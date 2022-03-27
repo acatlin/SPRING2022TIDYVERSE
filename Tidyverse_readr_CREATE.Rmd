@@ -1,0 +1,86 @@
+---
+title: "Tidyverse Readr"
+author: "Vyanna Hill"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Vigentte Info
+
+The vignette shows how Tidyverse's Readr can improve parasing data in R
+
+## Data
+
+The data is from an Five Thirty Eight article "Comic Books Are Still Made By Men, For Men And About Men" by Walt Hickey. The github with all the data sets used^[https://github.com/fivethirtyeight/data/tree/master/comic-characters].
+
+```{r load-packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readr)
+```
+
+### Reading csv files
+
+#### Reading a singular csv file
+
+Guess_max=INF will guess the columns type in pullling the dat set from the source.
+
+```{r code-chunk-label, message=FALSE, paged.print=TRUE}
+dc_comics<-read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/comic-characters/dc-wikia-data.csv",guess_max=Inf)
+head(dc_comics)
+
+```
+
+#### Subset data
+
+Q: How to read a subset of a data set from the source?
+A: use n_max
+
+```{r}
+one_h<-read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/comic-characters/dc-wikia-data.csv",n_max=100)
+
+```
+
+#### Multiple Files
+
+Q: How to read multiple csv files into one table?
+A: Create a list of the selected column names 
+
+Note: Both files column names need to be exact as its case-sensitive. For the example, I transferred marvel data in folder and change column name of "year" to "YEAR".
+
+```{r}
+dc_marvel<-read_csv(c("https://raw.githubusercontent.com/fivethirtyeight/data/master/comic-characters/dc-wikia-data.csv","marvel-wikia-data.csv"))
+print(as_tibble(dc_marvel))
+```
+
+
+
+### Column Specifications
+
+#### Column types 
+
+Q:How to observe the identified column values?
+A: Use spec(x) to see the types
+
+```{r warning=FALSE}
+spec(dc_comics)
+cols_condense(dc_comics)
+```
+
+#### Extraction of selected columns
+
+```{r}
+demo_Marvel<-read_csv("marvel-wikia-data.csv",col_select = c("name","ID","ALIGN","EYE","SEX","GSM","ALIVE"))
+print(as_tibble(demo_Marvel))
+```
+
+#### Changing column types
+
+```{r warning=FALSE, paged.print=TRUE}
+chng_m<-read_csv("marvel-wikia-data.csv",col_type =list("-","c","-","c","c","c","c","c","c","c","i","D","-"))
+spec(chng_m)
+```
+
