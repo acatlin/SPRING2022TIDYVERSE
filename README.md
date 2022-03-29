@@ -3,10 +3,10 @@ Collaborative site with your sample tidyverse code
 
 # Sample
 Initial Description and Link: 
-* Demonstrates how to flip ggplot axes
-* https://github.com/acatlin/FALL2021TIDYVERSE/blob/main/ggplot_forcats.rmd
 
+* How to use rvest to scrape a web page.
+* https://github.com/djunga/SPRING2022TIDYVERSE/blob/main/tidyverse%20recipe.Rmd
+=======
+* How to parase data using tidyverse's Readr
+*https://github.com/Vy4thewin/SPRING2022TIDYVERSE/blob/main/Tidyverse_readr_CREATE.Rmd
 
-Revision/Addition Description and Link:
-* Modified ggplot/forcats example to demonstrate sorting, other category
-* https://github.com/acatlin/FALL2021TIDYVERSE/blob/main/ggplot_forcats.rmd
