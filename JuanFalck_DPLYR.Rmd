@@ -1,0 +1,154 @@
+---
+title: "DPLYR Vignette"
+author: "Juan Falck"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# DPLYR
+
+## Introduction
+DPLYR is one of the Packages included in **TIDYVERSE**. The package simplifies the language used to select pieces of data set.
+
+## Intialization
+Let's load libraries we will need.
+
+```{r}
+#We will used readr to reac in a file to be used for the examples
+library(readr)
+library(dplyr)
+```
+
+If error, please ensure library is installed before by using the following command.  **install.packages("dplyr")** or **install.packages("readr")**
+
+Let's load a data set we will use for testing DPLYR. We will load from **FiveThirtyEight** a dataset about **Drug Use by Age**
+
+```{r}
+drug_use <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/drug-use-by-age/drug-use-by-age.csv")
+```
+
+
+## Main functions
+
+### Select
+**SELECT** allows us to easily select **COLUMNS** from a dataset.
+
+**USAGE**
+select(data,column1,columns2..columnn)
+
+Select a sing column
+
+```{r}
+drug_use %>%
+  select(age) %>%
+  head()
+```
+
+Select multiple columns.
+
+```{r}
+drug_use %>%
+  select(age,`cocaine-use` ) %>%
+  head()
+```
+
+You can select consecutive columns by using **:**
+```{r}
+drug_use %>%
+  select(age:`marijuana-use` ) %>%
+  head()
+```
+
+
+### Filter
+**FILTER** allows of to select a subset of **ROWS** from the dataframe
+
+**USAGE**
+filter(data,expression)
+
+Filtering by one criterion
+```{r}
+drug_use %>%
+  filter(age>20)
+```
+
+
+Filtering by two criteria with an **AND**
+```{r}
+drug_use %>%
+  filter(age>20 & `marijuana-use` <20)
+```
+
+
+Filtering by two criteria with an **OR**
+```{r}
+drug_use %>%
+  filter(age>20 | `marijuana-use` <20)
+```
+
+
+Combining **SELECT** and **FILTER**
+```{r}
+drug_use %>%
+  select(age,`alcohol-use`,`marijuana-use`) %>%
+  filter(`alcohol-use`<20)
+```
+
+
+### Mutate
+**MUTATE** allows us to add columns to our dataframes, which can be the result of operations between the existing ones.
+
+**USAGE**
+mutate(date,column_to_add)
+
+Add a single columns based on another one (In this example some rows will have NA, but for purpose of example it would be ok)
+```{r}
+drug_use %>%
+  mutate(age_months = as.numeric(age)*12) %>%
+  select(age,age_months)
+```
+
+
+
+### Summarise
+
+**SUMMARISE** creates a new data frame. It will have one (or more) rows for each combination of grouping variables; if there are no grouping variables, the output will have a single row summarising all observations in the input. It will contain one column for each grouping variable and one column for each of the summary statistics that you have specified.
+
+**USAGE**
+summarise(data, summary1, summar2, summaryn)
+
+Output the number of records in the dataframe.
+
+```{r}
+drug_use %>%
+  summarise(records = n())
+```
+
+Output the number of records by age-group
+```{r}
+drug_use %>%
+  group_by(age) %>%
+  summarise(records = n())
+```
+
+Sum a column under criteria.
+
+```{r}
+drug_use %>%
+  filter(age>21) %>%
+  summarise(mysum = sum(`cocaine-use`))
+```
