@@ -1,4 +1,4 @@
----
+==---
 title: "Import NYC Census Data into R tidyverse-ready with tidycensus"
 author: "Justin Williams"
 date: "4/1/2022"
@@ -133,7 +133,7 @@ acs_5yr_2020 %>%
                            scale = .001, prefix = "$", suffix = "k"
                          )) +
     labs(title = "NYC Median Income by Census Tract 2020",
-         caption = "Data source: ACS 5-yr 2016 - 2020",
+         caption = "Data source: ACS 5yr 2016 - 2020",
          fill = "Income")
 ```
 
@@ -184,43 +184,25 @@ nyc_race_2020_dc <- nyc_race_2020_dc %>%
 # preview results
 colnames(nyc_race_2020_dc)
 ```
+
 Now we can map race by Census Tract for NYC.
 
 ```{r race-census-tract}
-# write function
-map_race <- function(df, variable, race, col) {
-  df %>%
-  filter(variable == race) %>% 
-  ggplot(aes(fill = col)) +
-    geom_sf(color = NA) +
-    theme_void() +
-    scale_fill_discret +
-    labs(title = paste0("NYC % ", race, " by Census Tract 2020", sep = ""),
-         caption = "Data source: ACS 5-yr 2016 - 2020",
-         fill = "Percent")
-}
-
-map_race(nyc_race_2020_dc, "variable", "Black", "percent")
-
+# black by census tract
 nyc_race_2020_dc %>%
   filter(variable == "Black") %>% 
   ggplot(aes(fill = percent)) +
     geom_sf(color = NA) +
     theme_void() +
-    scale_fill_viridis_c(option = "magma", 
+    scale_fill_viridis_c(option = "viridis", 
                          na.value = "grey",
                          labels = scales::percent) +
     labs(title = "NYC % Black by Census Tract 2020",
-         caption = "Data source: ACS 5-yr 2016 - 2020",
+         caption = "Data source: ACS 5yr 2016 - 2020",
          fill = "Percent")
-
-nyc_race_2020_dc
 ```
-
 
 ## Conclusion
 
-Importing Census Data into R through the **tidycensus** package gives us the ability to work with tidyverse-ready data. Furthermore, the ability to simultaneously import geometry features, makes visualizing Census Data a breeze.
-
-
+Importing Census Data into R through the **tidycensus** package gives us the ability to work with tidyverse-ready Census data. Furthermore, the ability to simultaneously import geometry features, makes visualizations a breeze.
 
