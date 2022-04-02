@@ -1,0 +1,226 @@
+---
+title: "Import NYC Census Data into R tidyverse-ready with tidycensus"
+author: "Justin Williams"
+date: "4/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overivew of tidycensus
+
+**tidycensus** is a package developed *Kyle Walker* to allow users to interface with US Census Bureau data API, and return tidyverse-ready data frames. Furthermore, you can also optionally pull in geometry data from the **tigris** package, which allows you to immediately visualize geographical data with **ggplot** `geom_sf` function, or conduct further spatial analysis with the **sf** (simple features) package.
+
+## Getting started
+
+Firstly, sign up for a [Census API Key](http://api.census.gov/data/key_signup.html). Once you get an API key, save it in a safe location. You will want to hide your key and can do this by storing it as an environment variable in a `.env` file. Drew Seewald does a nice job explaining that here in his article [Using dotenv to Hide Sensitive Information in R](https://towardsdatascience.com/using-dotenv-to-hide-sensitive-information-in-r-8b878fa72020). Once you do this, you can call your environment variables by loading the **dotenv** package. Loading this along with the **tidycensus** and **tidyverse** packages, will get you started. Additionally, if you want to return feature geometry along with variables, include `tigris_use_cache = TRUE` in your options, as this will keep it loaded in the cache for easy re-loading. 
+
+```{r load-packages, message=FALSE}
+library(dotenv)
+library(tidyverse)
+library(tidycensus)
+options(tigris_use_cache = TRUE)
+```
+
+## Core functions
+
+For the following examples we will be using the following (2) Core functions from **tidycensus**:
+
+  - `get_deccenial()` - requests data from US Decennial Census for 2000, 2010 and 2020.
+  - `get_acs()` - requests data from the 1 and 5-year American Community Survey (ACS) samples.
+  
+There are a few more that pull from different Census data, you can find out more about those in *Kyle Walkers* book [Analyzing US Census Data](https://walker-data.com/census-r/index.html)
+
+### Viewing variables
+
+Before querying Census data, we need to know what variables are available. If you've ever worked with Census data before, you know its quite cumbersome, however **tidycensus** makes it easy, allowing us to make a call with the `load_variables()` function and view the result.
+
+For this example we will work with the latest ACS 5-year estimates 2016-2020. 
+
+To do this we define the following:
+
+```{r view-variables}
+# set the search to a variable
+acs20 <- load_variables(year =2020, 
+                        dataset = "acs5", 
+                        cache = T)
+# browse census variables
+View(acs20)
+```
+
+Once you're viewing the data set, you can type a search term and look up the variable identifier. 
+
+### Downlaod dataset
+
+Let's say we want to look at Median Income from the ACS 5-year estimate 2016 - 2020 for NYC by census tract, here's how we would make that call.
+
+```{r acs-5-yr, message=FALSE}
+# get acs 5 yr estimate for 2020
+acs_5yr_2020 <- get_acs(geography = "tract",
+              state = "New York",
+              county = c(
+                "Bronx",
+                "Kings",
+                "New York",
+                "Queens", 
+                "Richmond"),
+              year = 2020,
+              variables = "B19013_001",
+              key = Sys.getenv("CENSUS_API"),
+              geometry = TRUE)
+```
+
+The nice thing about **tidycensus** is we can type in the name of the state and county and it converts them to FIPS code. We set the variable to the `B19013_001` (Median Income)which we found by searching via the `load_variables()` and `View()` functions. The api key was bought in from the environment variable, and geometry was set to TRUE. This means geography data was bought in with the data set, and we can visualize it pretty easily.
+
+### Visualize Census Data
+
+Now that we have a data set with geometry, we can use **ggplot** `geom_sf` function to visualize median income across NYC Census Tracts.
+
+```{r median-income-map}
+acs_5yr_2020 %>% 
+  ggplot(aes(fill = estimate)) +
+    geom_sf(color = NA, size = 4) +
+    theme_void() +
+    scale_fill_viridis_c(option = "magma", 
+                         na.value = "lightgrey",
+                         labels = scales::dollar_format(
+                           scale = .001, prefix = "$", suffix = "k"
+                         )) +
+    labs(title = "NYC Median Income by Census Tract 2020",
+         caption = "Data source: ACS 5-yr 2016 - 2020",
+         fill = "Income")
+```
+
+Here we see the geometry contains boundaries for water, maybe that's not the most desirable. If you aren't familiar with NYC you may think those are Census Tracts that have NA for median income.
+
+So to counteract that, we can recall the data from the Census API this time setting the `cb` argument to FALSE, which utilizes the TIGER/Line shapefiles as opposed to the default Census Bureau's cartographic boundary shapefiles. TIGER/Line shapefiles are larger and as a result, take longer to load. However, they give us options to erase water boundaries.
+
+```{r recall-data, message=FALSE}
+# load simple features and tigris packages to exclude water boundaries
+library(sf)
+library(tigris)
+
+# recall data
+acs_5yr_2020 <- get_acs(geography = "tract",
+              state = "New York",
+              county = c(
+                "Bronx",
+                "Kings",
+                "New York",
+                "Queens", 
+                "Richmond"),
+              year = 2020,
+              variables = "B19013_001",
+              key = Sys.getenv("CENSUS_API"),
+              geometry = TRUE,
+              cb = FALSE) %>% 
+  st_transform(crs = 2263) %>% 
+  erase_water(area_threshold = 0.75)
+```
+
+Replot map with new data.
+
+```{r visualize-map-without-water}
+acs_5yr_2020 %>% 
+  ggplot(aes(fill = estimate)) +
+    geom_sf(color = NA, size = 4) +
+    theme_void() +
+    scale_fill_viridis_c(option = "magma", 
+                         na.value = "grey",
+                         labels = scales::dollar_format(
+                           scale = .001, prefix = "$", suffix = "k"
+                         )) +
+    labs(title = "NYC Median Income by Census Tract 2020",
+         caption = "Data source: ACS 5-yr 2016 - 2020",
+         fill = "Income")
+```
+
+The result is a much more professional looking map that excludes water and reserves grey for NA. In this instance they are primarily parks that are their own Census Tracts.
+
+### Let's try this with decennial data
+
+Search variables
+```{r}
+# decennial 2020 load variables
+dc2020 <- load_variables(year = 2020, dataset = "pl", cache = T)
+
+# view
+View(dc2020)
+
+# make call to api
+nyc_race_2020_dc <- get_decennial(
+  geography = "tract",
+  state = "New York",
+  county = c(
+                "Bronx",
+                "Kings",
+                "New York",
+                "Queens", 
+                "Richmond"),
+  year = 2020,
+  variables = c(White = "P2_005N",
+                Black = "P2_006N",
+                Native = "P2_007N",
+                Asian = "P2_008N",
+                Latinx = "P2_002N"),
+  key = Sys.getenv("CENSUS_API"),
+  summary_var = "P2_001N",
+  geometry = T,
+  cb = F
+) %>% 
+  st_transform(crs = 2263) %>% 
+  erase_water(area_threshold = 0.75)
+
+nyc_race_2020_dc
+```
+The `summary_var` is gives a column with total population for each Census Tract, therefore to create a percentage column we can use `mutate()`.
+
+```{r create-percent}
+nyc_race_2020_dc <- nyc_race_2020_dc %>% 
+  mutate(percent = (value / summary_value))
+
+# preview results
+colnames(nyc_race_2020_dc)
+```
+Now we can map race by Census Tract for NYC.
+
+```{r race-census-tract}
+# write function
+map_race <- function(df, variable, race, col) {
+  df %>%
+  filter(variable == race) %>% 
+  ggplot(aes(fill = col)) +
+    geom_sf(color = NA) +
+    theme_void() +
+    scale_fill_discret +
+    labs(title = paste0("NYC % ", race, " by Census Tract 2020", sep = ""),
+         caption = "Data source: ACS 5-yr 2016 - 2020",
+         fill = "Percent")
+}
+
+map_race(nyc_race_2020_dc, "variable", "Black", "percent")
+
+nyc_race_2020_dc %>%
+  filter(variable == "Black") %>% 
+  ggplot(aes(fill = percent)) +
+    geom_sf(color = NA) +
+    theme_void() +
+    scale_fill_viridis_c(option = "magma", 
+                         na.value = "grey",
+                         labels = scales::percent) +
+    labs(title = "NYC % Black by Census Tract 2020",
+         caption = "Data source: ACS 5-yr 2016 - 2020",
+         fill = "Percent")
+
+nyc_race_2020_dc
+```
+
+
+## Conclusion
+
+Importing Census Data into R through the **tidycensus** package gives us the ability to work with tidyverse-ready data. Furthermore, the ability to simultaneously import geometry features, makes visualizing Census Data a breeze.
+
+
+
