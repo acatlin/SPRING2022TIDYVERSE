@@ -79,7 +79,7 @@ The nice thing about **tidycensus** is we can type in the name of the state and 
 Now that we have a data set with geometry, we can use **ggplot** `geom_sf` function to visualize median income across NYC Census Tracts.
 
 ```{r median-income-map}
-acs_5yr_2020 %>% 
+acs <- acs_5yr_2020 %>% 
   ggplot(aes(fill = estimate)) +
     geom_sf(color = NA, size = 4) +
     theme_void() +
@@ -91,6 +91,10 @@ acs_5yr_2020 %>%
     labs(title = "NYC Median Income by Census Tract 2020",
          caption = "Data source: ACS 5-yr 2016 - 2020",
          fill = "Income")
+
+ggsave("./images/acs_5_yr_def.png", plot = acs)
+
+acs
 ```
 
 Here we see the geometry contains boundaries for water, maybe that's not the most desirable. If you aren't familiar with NYC you may think those are Census Tracts that have NA for median income.
@@ -123,7 +127,7 @@ acs_5yr_2020 <- get_acs(geography = "tract",
 Replot map with new data.
 
 ```{r visualize-map-without-water}
-acs_5yr_2020 %>% 
+acs2 <- acs_5yr_2020 %>% 
   ggplot(aes(fill = estimate)) +
     geom_sf(color = NA, size = 4) +
     theme_void() +
@@ -135,6 +139,10 @@ acs_5yr_2020 %>%
     labs(title = "NYC Median Income by Census Tract 2020",
          caption = "Data source: ACS 5yr 2016 - 2020",
          fill = "Income")
+
+ggsave("./images/acs_5_yr_2020_cb.png", plot = acs2)
+
+acs2
 ```
 
 The result is a much more professional looking map that excludes water and reserves grey for NA. In this instance they are primarily parks that are their own Census Tracts.
@@ -164,7 +172,7 @@ nyc_race_2020_dc <- get_decennial(
                 Black = "P2_006N",
                 Native = "P2_007N",
                 Asian = "P2_008N",
-                Latinx = "P2_002N"),
+                Hispanic = "P2_002N"),
   key = Sys.getenv("CENSUS_API"),
   summary_var = "P2_001N",
   geometry = T,
@@ -173,7 +181,8 @@ nyc_race_2020_dc <- get_decennial(
   st_transform(crs = 2263) %>% 
   erase_water(area_threshold = 0.75)
 
-nyc_race_2020_dc
+# preview results
+view(nyc_race_2020_dc)
 ```
 The `summary_var` is gives a column with total population for each Census Tract, therefore to create a percentage column we can use `mutate()`.
 
@@ -189,10 +198,12 @@ Now we can map race by Census Tract for NYC.
 
 ```{r race-census-tract}
 # black by census tract
-nyc_race_2020_dc %>%
-  filter(variable == "Black") %>% 
-  ggplot(aes(fill = percent)) +
-    geom_sf(color = NA) +
+race_black <- nyc_race_2020_dc %>%
+  filter(variable == "Black")
+
+race_black_map <- race_black %>% 
+  ggplot() +
+    geom_sf(color = NA,aes(fill = percent)) +
     theme_void() +
     scale_fill_viridis_c(option = "viridis", 
                          na.value = "grey",
@@ -200,6 +211,10 @@ nyc_race_2020_dc %>%
     labs(title = "NYC % Black by Census Tract 2020",
          caption = "Data source: ACS 5yr 2016 - 2020",
          fill = "Percent")
+
+ggsave("./images/black_ct.png", plot = race_black_map)
+
+race_black_map
 ```
 
 ## Conclusion
