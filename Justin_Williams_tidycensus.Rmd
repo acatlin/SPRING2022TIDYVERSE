@@ -1,4 +1,4 @@
----
+==---
 title: "Import NYC Census Data into R tidyverse-ready with tidycensus"
 author: "Justin Williams"
 date: "4/1/2022"
@@ -79,7 +79,7 @@ The nice thing about **tidycensus** is we can type in the name of the state and 
 Now that we have a data set with geometry, we can use **ggplot** `geom_sf` function to visualize median income across NYC Census Tracts.
 
 ```{r median-income-map}
-acs_5yr_2020 %>% 
+acs <- acs_5yr_2020 %>% 
   ggplot(aes(fill = estimate)) +
     geom_sf(color = NA, size = 4) +
     theme_void() +
@@ -91,6 +91,10 @@ acs_5yr_2020 %>%
     labs(title = "NYC Median Income by Census Tract 2020",
          caption = "Data source: ACS 5-yr 2016 - 2020",
          fill = "Income")
+
+ggsave("./images/acs_5_yr_def.png", plot = acs)
+
+acs
 ```
 
 Here we see the geometry contains boundaries for water, maybe that's not the most desirable. If you aren't familiar with NYC you may think those are Census Tracts that have NA for median income.
@@ -123,7 +127,7 @@ acs_5yr_2020 <- get_acs(geography = "tract",
 Replot map with new data.
 
 ```{r visualize-map-without-water}
-acs_5yr_2020 %>% 
+acs2 <- acs_5yr_2020 %>% 
   ggplot(aes(fill = estimate)) +
     geom_sf(color = NA, size = 4) +
     theme_void() +
@@ -133,8 +137,12 @@ acs_5yr_2020 %>%
                            scale = .001, prefix = "$", suffix = "k"
                          )) +
     labs(title = "NYC Median Income by Census Tract 2020",
-         caption = "Data source: ACS 5-yr 2016 - 2020",
+         caption = "Data source: ACS 5yr 2016 - 2020",
          fill = "Income")
+
+ggsave("./images/acs_5_yr_2020_cb.png", plot = acs2)
+
+acs2
 ```
 
 The result is a much more professional looking map that excludes water and reserves grey for NA. In this instance they are primarily parks that are their own Census Tracts.
@@ -164,7 +172,7 @@ nyc_race_2020_dc <- get_decennial(
                 Black = "P2_006N",
                 Native = "P2_007N",
                 Asian = "P2_008N",
-                Latinx = "P2_002N"),
+                Hispanic = "P2_002N"),
   key = Sys.getenv("CENSUS_API"),
   summary_var = "P2_001N",
   geometry = T,
@@ -173,7 +181,8 @@ nyc_race_2020_dc <- get_decennial(
   st_transform(crs = 2263) %>% 
   erase_water(area_threshold = 0.75)
 
-nyc_race_2020_dc
+# preview results
+view(nyc_race_2020_dc)
 ```
 The `summary_var` is gives a column with total population for each Census Tract, therefore to create a percentage column we can use `mutate()`.
 
@@ -184,43 +193,31 @@ nyc_race_2020_dc <- nyc_race_2020_dc %>%
 # preview results
 colnames(nyc_race_2020_dc)
 ```
+
 Now we can map race by Census Tract for NYC.
 
 ```{r race-census-tract}
-# write function
-map_race <- function(df, variable, race, col) {
-  df %>%
-  filter(variable == race) %>% 
-  ggplot(aes(fill = col)) +
-    geom_sf(color = NA) +
-    theme_void() +
-    scale_fill_discret +
-    labs(title = paste0("NYC % ", race, " by Census Tract 2020", sep = ""),
-         caption = "Data source: ACS 5-yr 2016 - 2020",
-         fill = "Percent")
-}
+# black by census tract
+race_black <- nyc_race_2020_dc %>%
+  filter(variable == "Black")
 
-map_race(nyc_race_2020_dc, "variable", "Black", "percent")
-
-nyc_race_2020_dc %>%
-  filter(variable == "Black") %>% 
-  ggplot(aes(fill = percent)) +
-    geom_sf(color = NA) +
+race_black_map <- race_black %>% 
+  ggplot() +
+    geom_sf(color = NA,aes(fill = percent)) +
     theme_void() +
-    scale_fill_viridis_c(option = "magma", 
+    scale_fill_viridis_c(option = "viridis", 
                          na.value = "grey",
                          labels = scales::percent) +
     labs(title = "NYC % Black by Census Tract 2020",
-         caption = "Data source: ACS 5-yr 2016 - 2020",
+         caption = "Data source: ACS 5yr 2016 - 2020",
          fill = "Percent")
 
-nyc_race_2020_dc
-```
+ggsave("./images/black_ct.png", plot = race_black_map)
 
+race_black_map
+```
 
 ## Conclusion
 
-Importing Census Data into R through the **tidycensus** package gives us the ability to work with tidyverse-ready data. Furthermore, the ability to simultaneously import geometry features, makes visualizing Census Data a breeze.
-
-
+Importing Census Data into R through the **tidycensus** package gives us the ability to work with tidyverse-ready Census data. Furthermore, the ability to simultaneously import geometry features, makes visualizations a breeze.
 
