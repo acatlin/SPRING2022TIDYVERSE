@@ -1,0 +1,51 @@
+---
+title: Data 607 Tidyverse
+author: Alex Moyse
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+
+## Vigentte Info
+
+The vignette shows how Tidyverse's stringr can help process data.
+
+
+```{r load-packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+### Reading csv files
+
+<H1> First things first, lets pull data </H1>
+
+```{r}
+url.data <- "https://raw.githubusercontent.com/fivethirtyeight/superbowl-ads/main/superbowl-ads.csv"
+
+raw <- read.csv(url(url.data), header = TRUE,) 
+```
+
+<H2> Let's Check out the head of the data </H2>
+
+```{r}
+head(raw)
+```
+
+<H1> stringr-The Next feature </H1>
+
+One of the best features is str_to_lower! Its great for making easy matches between columns or other reference data sets!
+
+For example:
+
+```{r}
+raw$brand <- str_to_lower(raw$brand)
+```
+
+And lets take a peek at it:
+
+```{r}
+raw
+```
+As you can see, it has been  lowered! 
