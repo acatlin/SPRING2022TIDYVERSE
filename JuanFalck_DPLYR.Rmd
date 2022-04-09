@@ -22,13 +22,13 @@ knitr::opts_chunk$set(
 # DPLYR
 
 ## Introduction
-DPLYR is one of the Packages included in **TIDYVERSE**. The package simplifies the language used to select pieces of data set.
+DPLYR is one of the Packages included in **TIDYVERSE**. The package simplifies the language used to select pieces of data set. It makes it simple to select columns, row, add columns and summarise data by groups or the results of a formula derived from the content of rows and columns.
 
 ## Intialization
 Let's load libraries we will need.
 
 ```{r}
-#We will used readr to reac in a file to be used for the examples
+#We will used readr to read in a file to be used for the examples
 library(readr)
 library(dplyr)
 ```
@@ -45,11 +45,12 @@ drug_use <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/mas
 ## Main functions
 
 ### Select
-**SELECT** allows us to easily select **COLUMNS** from a dataset.
+**SELECT** allows us to easily select **COLUMNS** from a data set.
 
 **USAGE**
 select(data,column1,columns2..columnn)
 
+**Use cases**
 Select a sing column
 
 ```{r}
@@ -67,6 +68,7 @@ drug_use %>%
 ```
 
 You can select consecutive columns by using **:**
+
 ```{r}
 drug_use %>%
   select(age:`marijuana-use` ) %>%
@@ -80,6 +82,7 @@ drug_use %>%
 **USAGE**
 filter(data,expression)
 
+**Use cases**
 Filtering by one criterion
 ```{r}
 drug_use %>%
@@ -115,13 +118,14 @@ drug_use %>%
 **USAGE**
 mutate(date,column_to_add)
 
+**Use cases**
 Add a single columns based on another one (In this example some rows will have NA, but for purpose of example it would be ok)
+
 ```{r}
 drug_use %>%
   mutate(age_months = as.numeric(age)*12) %>%
   select(age,age_months)
 ```
-
 
 
 ### Summarise
@@ -130,6 +134,8 @@ drug_use %>%
 
 **USAGE**
 summarise(data, summary1, summar2, summaryn)
+
+**Use cases**
 
 Output the number of records in the dataframe.
 

@@ -1,0 +1,137 @@
+---
+title: "Circular Bars"
+author: "Diana Plunkett"
+date: "3/27/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+
+heros <- read_csv("https://raw.githubusercontent.com/dianaplunkett/607/main/heros.csv", show_col_types = FALSE)
+```
+# CIRCULAR BAR CHARTS
+
+Why Circular Bar Charts?  Like regular Bar Charts, they rely on human skill in seeing differences in area, which is intuitive to most people.    
+
+With a Circular Bart Chart, you can fit more "rows" as it spirals around, thus taking up less space than a long or wide bar chart.    
+
+Plus it is visually appealing, catching one's interest.  
+
+## The Data
+Using the superhero data set again, which shows the ratings for various superhero shows.  To keep things simple, to focus on how to structure the data for use in a Circular Bar Chart and then construct it, we will simply look at how many titles were rated each year from 1948-1999.  
+
+## Shaping the Data
+The structure of the data is similar to a regular bar chart - the x axis is a factor (in this case the start year of the superhero show) and the y axis is a value (here, the number of titles for that year).  We will also be coloring by each decade to highlight them.
+
+The Circular Bar Chart works best with about 40 - 60 rows (depending on how big your display area is).  
+
+Here we create a "mini.heros" data set that has the following columns:     
+     - decade: two character decade used to color (fill) the bars    
+     - startYr: first year in range of release years (used as x axis)    
+     - titleCt: A count of shows with the same start year (used as y axis)    
+     - row_num: a sequential row number (used to calculate the angles)    
+     
+We also arrange the rows in order by startYr, so in our chart the years show in order.     
+
+```{r}
+mini.heros <- heros %>% 
+    mutate(startYr = str_sub(release_year,1,4)) %>%
+    filter(str_sub(startYr,1,2) == "19" ) %>%
+    group_by(startYr) %>%
+    mutate(titleCt = n_distinct(show_title)) %>%
+    distinct(startYr, .keep_all = TRUE) %>%
+    mutate(decade=str_c(str_sub(startYr,3,3),"0")) %>%
+    select(decade, startYr, titleCt) %>%
+    arrange(startYr)
+
+mini.heros$row_num <-seq.int(nrow(mini.heros))
+
+head(mini.heros)
+```
+## Data for Labels
+We need to create a "duplicate" data set for the labels and their angles.    
+
+```{r}
+# creating the duplicate data
+lbls <- mini.heros
+# each row will be a bar in the chart, and we need to know how many
+num_bars <- nrow(lbls)
+# calculate the angle for the label on each bar. The -.5 centers the label.
+angle <- 90-360 * (lbls$row_num - .5) / num_bars
+# alignment of labels: right or left
+# To see what this does, look at the 12 and 6 o'clock position on the chart.
+# You will see the "switch".
+# In this example, the century will be closest to the bar on the right side.
+# and away from the bar on the left
+lbls$hjust<-ifelse( angle < -90, 1, 0)
+lbls$angle<-ifelse(angle < -90, angle+180, angle)
+```
+
+## Construct the Chart
+The foundation of this is ggplot() + geom_bar().    
+
+A couple of things to note:    
+     - Because we have small values (titleCt ranges from 1-18), we multiply by 5 on the y axis so it shows better.  This does not change the relative proportions, and makes it easier to see. This may or may not be needed depending on the data used.  Try playing with the multiplier to see the impact.      
+     - flll = decade will fill each decade with its own color    
+     - stat='identity' is used so the y axis will  be the value of titleCt*5, (overriding the default of stat='count')     
+     - alpha is for the depth of color (ranges from 0-1).     
+
+We then add the ylim().  The negative number here controls the white space in the middle.  Too small and the labels will be mushed.  Too big and the white space will over power the bars.  Again, play with the numbers to see the impact.  
+
+Adding theme_minimal(), which has no background annotations, and then theme() with many elements "none" or element_blank() keeps a clean look to the chart.    
+coord_polar() makes it a circular plot. Here we are using the defaults, which are:    
+    - theta = 'x' - mapping the angle to x
+    - start = 0 - an offset from 12 o'clock
+    - direction = 1 - clockwise (0 would be counterclockwise)
+    
+And finally we use geom_text to add the labels. 
+
+```{r}
+ggplot(mini.heros) +
+#start with geom_bar 
+    geom_bar(aes(x=startYr, 
+                 y=titleCt*5,   #multiple by 5 since we have small values
+                 fill = decade),#color by decade
+             stat="identity",
+             alpha=0.5)+
+    ylim(-50, 100) +            #-50 controls inner white space. Experiment!
+    theme_minimal() +           #just keeping the visual clean & spare
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1,4), "cm")) +
+    coord_polar() +             #this is what makes it a circle
+    geom_text(data=lbls,        #using the lbls data set here
+              aes(x=row_num, 
+                  y=titleCt+10, 
+                  label=startYr, 
+                  hjust=hjust), #how the labels look on the left and right
+              color="black", 
+              fontface="bold",
+              alpha=0.6, 
+              size=2.5, 
+              angle= lbls$angle, #the angle
+              inherit.aes = FALSE ) 
+        
+
+```
+
+## Conclusion
+A Circular bar chart can be eye catching and allow more "bars" to show in a smaller space than a traditional bar chart. It works best with somewhat simple data (total by year, in our case).  
+
+Some caveats - what we have done works to see the ebb and flow year by year.  But it is challenging to compare years not close.  Can you tell which is larger: 1999 or 1985?  (12 and 13 titles respectively.)    
+
+Ideas for extending: Can you make this a stacked bar chart (using genre)?    
+
+#Citation: https://r-graph-gallery.com/index.html    
+This site is super helpful for remembering how to build lots of charts types.
+
+
