@@ -1,0 +1,98 @@
+---
+title: "ggplot2 Basic Scatter Plot Vignette"
+author: "Brian Singh"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+    chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# ggplot2
+
+## Introduction
+ggplot2 is a system for declaratively creating graphics, based on The Grammar of Graphics. You provide the data, tell ggplot2 how to map variables to aesthetics, what graphical primitives to use, and it takes care of the details.
+
+## Installation and initializing libraries
+You may install ggplot2 in the following ways:
+
+#1. Install the entire tidyverse
+install.packages("tidyverse")
+
+#2. Install just ggplot2
+install.packages("ggplot2")
+
+#3. Install the development version from GitHub
+devtools::install_github("tidyverse/ggplot2")
+
+You will need to initialize the libraries in order to read in data, as well as to utilize the functions of ggplot2.
+```{r}
+library(readr)
+library(curl)
+library(ggplot2)
+library(dplyr)
+```
+
+Let's load data we will use for testing ggplot2 We will load data obtained from **Kaggle** a dataset about **NFL Passing Statistics 2009-2018** (see https://www.kaggle.com/omzqwonxei/nfl-passing-statistics-20092018). Note, the statistics for each year are separated into multiple CSVs (all with the same number of, and named, columns). We will use rbind() to aggregate the different data frames into one.
+
+```{r}
+pass_2009 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2009.csv"))
+pass_2010 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2010.csv"))
+pass_2011 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2011.csv"))
+pass_2012 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2012.csv"))
+pass_2013 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2013.csv"))
+pass_2014 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2014.csv"))
+pass_2015 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2015.csv"))
+pass_2016 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2016.csv"))
+pass_2017 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2017.csv"))
+pass_2018 <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/Data606/main/pass-2018.csv"))
+nfl_passing_2009_2018 <- rbind(pass_2009,pass_2010,pass_2011,pass_2012,pass_2013,pass_2014,pass_2015,pass_2016,pass_2017,pass_2018)
+```
+
+## Main functions
+There are numerous functions you can use in ggplot2 to develop your visualizations. We will focus on some of the basic ones to get you started.
+
+### ggplot()
+**ggplot()** initializes a **ggplot** object. Within ggplot, you can specific the data to be used, as well as the aesthetics to apply. It can be used in conjunction with geom_point(), geom_bar(), etc., to create scatterplots, bar charts, as desired.
+
+**USAGE**
+ggplot(data = dataframe, mapping = aes(x,y,color,etc.))
+
+**Use cases**
+Use a scatterplot to plot a player's age (x-axis) and total passing yards from 2009-2018 (y-axis).
+
+```{r}
+nfl_passing_2009_2018 %>%
+  ggplot(aes(x=Age, y=Yds)) +
+  geom_point()
+```
+
+Add color based on total yards thrown. The default color assigned is blue.
+
+```{r}
+nfl_passing_2009_2018 %>%
+  ggplot(aes(x=Age, y=Yds, color=Yds)) +
+  geom_point()
+```
+
+You can change add filters, as well as change the size of the bubbles on the scatterplot. In the case below, we'll look for quarterbacks only, over the age of 30, who played a minimum of 13 games, and change the size of the plots to 3.
+
+```{r}
+nfl_passing_2009_2018 %>%
+    filter(Pos=="QB",Age>30,G>13) %>%
+  ggplot(aes(x=Age, y=Yds, color=Yds,size=3)) +
+  geom_point()
+```
+
+### ggplot2 cheat sheet
+More information on various ggplots to use, as well as additional aesthetics can be found here: https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf .
