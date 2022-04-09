@@ -1,0 +1,56 @@
+---
+title: "Deepika Dilip - Tidyverse CREATE"
+output:
+  html_document:
+    df_print: paged
+---
+For this assignment, I'll be using the FiveThirtyEight (https://github.com/fivethirtyeight/data/tree/master/congress-generic-ballot) dataset on approval ratings based on the COVID-19 response
+
+
+```{r message = F, warning = F}
+library(tidyverse)
+library(janitor)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(ggthemes)
+```
+
+## Data Import
+```{r}
+dat = read.csv("https://projects.fivethirtyeight.com/generic-ballot-data/generic_polllist.csv")
+head(dat, 1) %>% kable() 
+```
+
+The two packages we'll be focusing on are `stringr` and `ggplot2`. For stringr, I'll start by extracting the website names from the URLs:
+
+First, we can preview a couple of these:
+
+```{r}
+dat %>% select(url) %>% slice(1:3L) %>% kable() 
+```
+
+## Stringr
+The next step is the extraction. We need to come up with a regex term that will eliminate the first and last part of the url:
+
+```{r}
+dat$site.name = str_replace(dat$url, 'http?(s)\\:(www)?\\/\\/', "")
+dat$site.name = str_replace(dat$site.name, 'www.', "")
+dat$site.name = str_replace(dat$site.name, '\\/(.)+', "")
+dat$site.name = str_replace(dat$site.name, '\\.com|edu|org|net', "")
+writeLines(dat$site.name[1:5])
+```
+
+This isn't foolproof, but it's a great way of assessing where these polls are coming from. The next step is visualizing this data. For this, we'll aggregate:
+
+```{r}
+dat.aggregate = dat %>% group_by(site.name) %>% summarise(n = n()) %>% arrange(desc(n))
+dat.aggregate$site.name = factor(dat.aggregate$site.name, levels = dat.aggregate$site.name)
+```
+
+## ggplot2
+Now we can use `ggplot2` to visualize the results. We'll visualize the top 15:
+
+```{r}
+ggplot(dat.aggregate[1:15,], aes(site.name, n)) + geom_bar(stat = "identity", fill = "navyblue") + theme_minimal()  + theme(axis.text.x = element_text(angle = 90))
+```
