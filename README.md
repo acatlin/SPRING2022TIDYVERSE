@@ -11,3 +11,5 @@ Initial Description and Link:
 *https://github.com/Vy4thewin/SPRING2022TIDYVERSE/blob/main/Tidyverse_readr_CREATE.Rmd
 
 * Deepika Dilip, tidyverse CREATE: DeepikaDilip_tidyverseCreate.Rmd
+
+* How to use ggplot map, col and count: <a href = "https://github.com/moiyajosephs/SPRING2022TIDYVERSE/blob/main/MoiyaJosephs_ggplot.Rmd"> Moiya Josephs GGPlot Rmd </a>
