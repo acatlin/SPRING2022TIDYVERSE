@@ -11,43 +11,57 @@ library(ggplot2)
 library(tidyverse)
 ```
 
+# GGPLOT 
+
+Is a package in `ggplot` that allows us to visualize our data and make it clearer when presenting our findings. In this document I plan to show how to use ggplot features that are not just bar plots or line charts.
+The data I will be using to demo the different features of ggplot is one that rates Ramen. It allows me to show how ggplot graphs discrete and continuous variables.
+
 # Read Data
 
 ```{r}
 ramen_ratings <- read.csv("https://raw.githubusercontent.com/moiyajosephs/Data607-Project2/main/ramen-ratings.csv")
 ```
 
-# GGPLOT 
+## Plot Ramen
 
-Is a package in `ggplot` that allows us to visualize our data and make it clearer when presenting our findings. 
+### Geom Count 
 
-## Plot Fandango
+When plotting two discrete variables `geom_count` is recommended. `Geom_Count` is a variation of `geom_point` and maps the frequency for each observation. It has a legend for the dots, the larger the dot the more of that value there is in the data.
 
-Both discrete 
 ```{r}
-ggplot(ramen_ratings, aes(Brand,Style, color = Style)) + geom_count()
+ggplot(ramen_ratings, aes(Brand, Style, color = Style)) + geom_count() + theme(axis.text.x = element_blank() )
 ```
 
+
+## Geom Col 
+
+`Geom col` is identical to geom_bar since it shows bar charts. The difference with `geom_col` is that it allows you to plot the bars relative to the data instead of the number of types x occurs like `geom_bar`.
+
+Below I am able to plot the brand of ramen and the ratings they received.
+
 ```{r}
+ramen_ratings$Stars <- as.numeric(ramen_ratings$Stars)
+
 ggplot(head(ramen_ratings,10), aes(Brand, Stars, fill = Style) ) + geom_col() +  theme(axis.text.x = element_text(angle = -30, vjust = 1, hjust = 0))
 
 ```
+
+### Geom Map
+
+This is the most interesting of the data and if data has regions specified, you can map where each point is. The function `map_data` allows you to get the longitude and latitude of a region specified, like state, or country. The ramen data is international, luckily we can also set `map_data` to world, so it collects all the coordinates of countries in the world.
 ```{r}
-ramen_ratings$Stars <- as.numeric(ramen_ratings$Stars)
 map <- map_data("world")
-# select region in ramen ratings, get set
-regions <- unique(ramen_ratings$Country)
-
-# select country in map, select 
-m1 <- map %>% filter(region %in% regions) 
-m1 <- distinct(m1, region, .keep_all = TRUE)
+```
+This data is very large, however, and we do not need all the coordinates for the same country. So I used the `distinct` function in order to get unique row values for each country in `map_data` and call it `map_regions.set`.
+```{r}
+map.regions.set <- distinct(map, region, .keep_all = TRUE)
 ```
 
-```{r}
-life.exp.map <- left_join(ramen_ratings, m1, by = c("Country"="region"))
-```
+Now that I have the unique regions, I can left join it with the map data where the country equals the region. That way we have the ramen information from the original dataset, joined with the coordinates for the region of each plot,
 
 ```{r}
+ramen.map <- left_join(ramen_ratings, map.regions.set, by = c("Country"="region"))
+
 ggplot() +
   geom_map(
     data = map, map = map,
@@ -55,18 +69,27 @@ ggplot() +
     color = "white", fill = "lightgray", size = 0.1
   ) +
   geom_point(
-    data = life.exp.map,
+    data = ramen.map,
     aes(long, lat, color = Style),
     alpha = 0.7
   )
 ```
-`r citation("tidyverse")`
+
+The map above shows where the style of ramens are located around the world. At a glance, a person could see that pack is a popular ramen style.
 
 
 
-References: 
-https://www.kaggle.com/datasets/residentmario/ramen-ratings?resource=download
+# Conclusion
 
-https://rdrr.io/cran/ggplot2/man/map_data.html
+`Ggplot` is a very powerful library within tidyverse that allows you to make various visualizations based on your data. With visualizations, data scientists can present any key findings in an easy to understand way.
 
-https://datavizpyr.com/how-to-make-world-map-with-ggplot2-in-r/
+
+# References
+
+1. `r citation("tidyverse")`
+
+2. https://www.kaggle.com/datasets/residentmario/ramen-ratings?resource=download
+
+3. https://rdrr.io/cran/ggplot2/man/map_data.html
+
+4. https://datavizpyr.com/how-to-make-world-map-with-ggplot2-in-r/
