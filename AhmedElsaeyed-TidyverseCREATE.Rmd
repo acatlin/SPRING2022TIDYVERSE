@@ -1,0 +1,87 @@
+---
+title: "AhmedElsaeyed-TidyVerseCreate"
+author: "Ahmed Elsaeyed"
+date: "4/9/2022"
+output:
+  html_document:
+    df_print: paged
+    fig_caption: true
+    theme: cosmo
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message= FALSE)
+library(dplyr) 
+library(stringr)
+library(lubridate)
+library(ggplot2)
+```
+
+
+## Data Import
+
+To begin I will import my data, which I downloaded from: https://www.kaggle.com/datasets/datota/fruit-and-vegatable-prices-in-uk-2017-2022?resource=download. This is a dataset that tracks the average prices of fruits on a weekly basis in the UK. My goal is to plot the trend in prices for apples over the years to see when they tend to be cheapest and presumably in-season and tasty.
+```{r}
+groc_prices = read.csv("https://raw.githubusercontent.com/aelsaeyed/Data607/main/fruitvegprices-2017_2022.csv")
+
+head (groc_prices, 10)
+```
+## Filter
+To achieve this I will use an array of tools from Tidyverse, mainly dplyr and stringr. The first step is to filter for the data I want, mainly apples. 
+```{r}
+apples <- groc_prices %>%
+  filter(item == "apples")
+
+apples
+```
+## Side Quest
+As a side-quest I decided to see which variety of apple is the most expensive on average. 
+
+```{r side quest}
+pricey_fruit <- apples %>% 
+  group_by(variety) %>% 
+  summarise(variety_price = max(mean(price))) %>% 
+  arrange(desc(variety_price))
+
+pricey_fruit
+```
+
+## Date Ordering
+
+I decided to ignore the variety of apple as a relevant factor for now and chose to simply get the average price of all apples per day. I will then plot that data to see the trend. I had to do something about the date column first, which was in char format. Lubridate allows me to do this easily using the ymd function. I can now arrange by date descending.
+
+```{r}
+apples_clean_date <- apples %>% 
+  mutate(`date` = ymd(date) ) %>% 
+  arrange(desc(date))  # %>% 
+  #select(date, price)
+
+apples_clean_date
+```
+
+## Average Price Per Date
+I now want just one price value per date to represent all the apples, and I will use the average price.
+
+```{r average price per date}
+weekly_apples <- apples_clean_date %>% 
+  group_by(date) %>% 
+  summarise( price_day = mean(price) ) %>% 
+  arrange(desc(date))
+weekly_apples
+```
+## Plotting
+I can now create a graph of the prices as they change over the weeks:
+
+```{r plot}
+ggplot(data=weekly_apples, aes(x=date, y=price_day, group=1)) +
+  geom_line()+
+  geom_point() +
+  scale_x_date(date_labels="%b %y",date_breaks  ="2 months") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylab("Price") + xlab("Date") +
+  ggtitle("Price per Apple Weekly", "When is the cheapest time to keep the doctor away?") +
+  geom_line(color="pink", size=1) + 
+  geom_point(color="black", size=1)
+```
+The trend seems to be that the apples get more expensive in the summers, with a strange inversion in 2021.
