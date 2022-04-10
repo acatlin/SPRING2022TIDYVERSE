@@ -1,0 +1,83 @@
+---
+title: "Data 607 Tidyverse Stringr"
+author: "Alex Moyse, Vyanna Hill"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Vigentte Info
+
+The vignette shows how Tidyverse's stringr can help process data.
+
+
+```{r load-packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+### Reading csv files
+
+<H1> First things first, lets pull data </H1>
+
+```{r}
+url.data <- "https://raw.githubusercontent.com/fivethirtyeight/superbowl-ads/main/superbowl-ads.csv"
+raw <- read.csv(url(url.data), header = TRUE,) 
+```
+
+<H2> Let's Check out the head of the data </H2>
+
+```{r}
+head(raw)
+```
+
+<H1> stringr-The first great feature </H1>
+
+A great part of stringr is the ability to find if there is a string inside of another string! A great example of this is:
+
+```{r}
+raw$test <- str_detect(raw$brand, "Toyota")
+```
+
+
+The best thing about this is that you can iterate it across the scope of the data set, making is super easy to test and try other items. Here is the result:
+
+
+```{r}
+print(as_tibble(raw))
+```
+
+## Vignette Extension
+
+### Locating specific string
+
+We can even use String in string location. For our example, let's say super bowl ads want to QA that their urls are all the same length and start at the same position. 
+
+```{r}
+url_check<-str_locate(raw$superbowl_ads_dot_com_url,"superbowl-ads.com")
+unique(url_check)
+```
+
+### String extraction
+
+Another example of Stringr is its string extraction. Let's use str_extract_all to extract all Superbowl ads from Budweiser.
+
+```{r}
+bud<-raw%>%filter(brand=="Budweiser")
+bud$Title<-str_extract(bud$superbowl_ads_dot_com_url,"\\d{4}-budweiser-(.*)")
+
+```
+
+### String replacement
+
+Lets clean up the new title column to display them best as possible. We will use str_replace and str_ to_title for this task in order to remove any black slashes and replicate proper format.
+
+```{r}
+bud$Title<-str_replace(bud$Title,"/"," ")
+bud$Title<-str_replace(bud$Title,"-budweiser-"," ")
+bud$Title<-str_replace_all(bud$Title,"-"," ")
+bud$Tile<-str_to_title(bud$Title)
+bud$Title<-str_replace(bud$Title,"//d{4}","")
+Bud_ads<-bud%>%select(c("Title","year","superbowl_ads_dot_com_url"))
+```
