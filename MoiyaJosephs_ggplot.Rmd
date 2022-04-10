@@ -1,0 +1,72 @@
+---
+title: "Tidyverse CREATE"
+author: "Moiya Josephs"
+date: "4/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+```
+
+# Read Data
+
+```{r}
+ramen_ratings <- read.csv("https://raw.githubusercontent.com/moiyajosephs/Data607-Project2/main/ramen-ratings.csv")
+```
+
+# GGPLOT 
+
+Is a package in `ggplot` that allows us to visualize our data and make it clearer when presenting our findings. 
+
+## Plot Fandango
+
+Both discrete 
+```{r}
+ggplot(ramen_ratings, aes(Brand,Style, color = Style)) + geom_count()
+```
+
+```{r}
+ggplot(head(ramen_ratings,10), aes(Brand, Stars, fill = Style) ) + geom_col() +  theme(axis.text.x = element_text(angle = -30, vjust = 1, hjust = 0))
+
+```
+```{r}
+ramen_ratings$Stars <- as.numeric(ramen_ratings$Stars)
+map <- map_data("world")
+# select region in ramen ratings, get set
+regions <- unique(ramen_ratings$Country)
+
+# select country in map, select 
+m1 <- map %>% filter(region %in% regions) 
+m1 <- distinct(m1, region, .keep_all = TRUE)
+```
+
+```{r}
+life.exp.map <- left_join(ramen_ratings, m1, by = c("Country"="region"))
+```
+
+```{r}
+ggplot() +
+  geom_map(
+    data = map, map = map,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", size = 0.1
+  ) +
+  geom_point(
+    data = life.exp.map,
+    aes(long, lat, color = Style),
+    alpha = 0.7
+  )
+```
+`r citation("tidyverse")`
+
+
+
+References: 
+https://www.kaggle.com/datasets/residentmario/ramen-ratings?resource=download
+
+https://rdrr.io/cran/ggplot2/man/map_data.html
+
+https://datavizpyr.com/how-to-make-world-map-with-ggplot2-in-r/
