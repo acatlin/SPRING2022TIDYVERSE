@@ -11,3 +11,5 @@ Initial Description and Link:
 *https://github.com/Vy4thewin/SPRING2022TIDYVERSE/blob/main/Tidyverse_readr_CREATE.Rmd
 
 * Deepika Dilip, tidyverse CREATE: DeepikaDilip_tidyverseCreate.Rmd
+
+*Ahmed Elsaeyed - An Apple a Day CREATE: https://github.com/aelsaeyed/SPRING2022TIDYVERSE/blob/main/AhmedElsaeyed-TidyverseCREATE.Rmd
