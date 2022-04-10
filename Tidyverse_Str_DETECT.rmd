@@ -77,7 +77,8 @@ Lets clean up the new title column to display them best as possible. We will use
 bud$Title<-str_replace(bud$Title,"/"," ")
 bud$Title<-str_replace(bud$Title,"-budweiser-"," ")
 bud$Title<-str_replace_all(bud$Title,"-"," ")
-bud$Tile<-str_to_title(bud$Title)
-bud$Title<-str_replace(bud$Title,"//d{4}","")
+bud$Title<-str_replace(bud$Title,"\\d{4}","")
+bud$Title<-str_to_title(bud$Title)
 Bud_ads<-bud%>%select(c("Title","year","superbowl_ads_dot_com_url"))
+print(as_tibble(Bud_ads))
 ```
