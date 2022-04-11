@@ -12,6 +12,9 @@ Initial Description and Link:
 
 * Deepika Dilip, tidyverse CREATE: DeepikaDilip_tidyverseCreate.Rmd
 
+
+* How to use ggplot map, col and count: <a href = "https://github.com/moiyajosephs/SPRING2022TIDYVERSE/blob/main/MoiyaJosephs_ggplot.Rmd"> Moiya Josephs GGPlot Rmd </a>
+=======
 *Ahmed Elsaeyed - An Apple a Day CREATE: https://github.com/aelsaeyed/SPRING2022TIDYVERSE/blob/main/AhmedElsaeyed-TidyverseCREATE.Rmd
 * How to use the pipe operator to organize data in R using tidyverse's Dyplr
 * https://github.com/AldataSci/SPRING2022TIDYVERSE/blob/main/Al'sDyplr.Rmd
