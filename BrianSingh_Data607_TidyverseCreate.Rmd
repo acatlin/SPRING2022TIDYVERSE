@@ -94,5 +94,31 @@ nfl_passing_2009_2018 %>%
   geom_point()
 ```
 
+### AES
+**AES** it's an important part of the ggplot structure. In order to specify the axes, we need to use the aes() function. aes is short for “aesthetic”, and it is where we tell ggplot what columns we want to use for different parts of the plot.
+
+```{r}
+nfl_passing_2009_2018 %>%
+    filter(Pos=="QB",Age>30,G>13) %>%
+  ggplot(aes(x=Age, y=Yds, color=Yds,size=3)) +
+  geom_point()
+```
+
+Here we telling R that Age will be our X axis, and Yds will be our Y axis. Also we include **color** which will be driven by the Yds paramater.
+
+### Geoms
+Typically when we think of visualizations, we normally think about the type of graph since it’s really the shapes that we see that tell us most of the information. While the ggplot2 package gives us a lot of flexibility in terms of choosing a shape to draw the data, it’s worth taking some time to consider which one is best for our question.
+
+To create a line graph with ggplot(), we use the **geom_line()** function. A geom is the name for the specific shape that we want to use to visualize the data. All of the functions that are used to draw these shapes have geom in front of them. **geom_line()** creates a line graph, **geom_point()** creates a scatter plot, and so on.
+
+```{r}
+nfl_passing_2009_2018 %>%
+    filter(Pos=="QB",Age>30,G>13) %>%
+  ggplot(aes(x=Age, y=Yds, color=Yds,size=3)) +
+  geom_point()
+```
+
+In this case **geom_point()** is telling R and qqplot to plot a single point for each piece of data, thus we would get a scatterplot.
+
 ### ggplot2 cheat sheet
 More information on various ggplots to use, as well as additional aesthetics can be found here: https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf .
