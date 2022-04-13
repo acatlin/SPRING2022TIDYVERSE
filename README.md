@@ -22,3 +22,5 @@ Initial Description and Link:
 * Benson Toi and Jay Lee
 * How to overview data before performing analysis
 * https://github.com/jayleecunysps/AssignmentforSPS/blob/main/Benson_Jay_tinyverse.Rmd
+
+* Extension of "ggplot2 Basic Scatter Plot Vignette": https://github.com/djunga/SPRING2022TIDYVERSE/blob/main/BrianSingh_Data607_TidyverseCreate.Rmd
