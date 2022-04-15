@@ -22,3 +22,8 @@ Initial Description and Link:
 * Benson Toi and Jay Lee
 * How to overview data before performing analysis
 * https://github.com/jayleecunysps/AssignmentforSPS/blob/main/Benson_Jay_tinyverse.Rmd
+
+How to use tidycensus to import census data with spatial geometry seamlessly into R
+by Justin Williams
+https://github.com/justinm0rgan/SPRING2022TIDYVERSE/blob/main/Justin_Williams_tidycensus.Rmd
+
