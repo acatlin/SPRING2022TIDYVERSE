@@ -22,10 +22,10 @@ Initial Description and Link:
 
 
 * PK O'Flaherty  
- -  tidyverse CREATE: PKOFlaherty_ggplot2_create.Rmd  
-    https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKOFlaherty_ggplot2_create.Rmd  
- -  tidyverse EXTEND: PKO_extend_MoiyaJosephs_ggplot.Rmd  
-    https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKO_extend_MoiyaJosephs_ggplot.Rmd  
+  tidyverse CREATE: PKOFlaherty_ggplot2_create.Rmd  
+  https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKOFlaherty_ggplot2_create.Rmd  
+  tidyverse EXTEND: PKO_extend_MoiyaJosephs_ggplot.Rmd  
+  https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKO_extend_MoiyaJosephs_ggplot.Rmd  
 
 * Benson Toi and Jay Lee
 * How to overview data before performing analysis
