@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 # DPLYR
 
 ## Introduction
-DPLYR is one of the Packages included in **TIDYVERSE**. The package simplifies the language used to select pieces of data set. It makes it simple to select columns, row, add columns and summarise data by groups or the results of a formula derived from the content of rows and columns.
+DPLYR is one of the Packages included in **TIDYVERSE**. The package simplifies the language used to select pieces of data set. It makes it simple to select columns, row, add columns and summarise data by groups or the results of a formula derived from the content of rows and columns. Dyplyr also allows you to rearrange rows or columns and select sections of the dataframe. 
 
 ## Intialization
 Let's load libraries we will need.
@@ -51,7 +51,7 @@ drug_use <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/mas
 select(data,column1,columns2..columnn)
 
 **Use cases**
-Select a sing column
+Select a single column
 
 ```{r}
 drug_use %>%
@@ -116,7 +116,7 @@ drug_use %>%
 **MUTATE** allows us to add columns to our dataframes, which can be the result of operations between the existing ones.
 
 **USAGE**
-mutate(date,column_to_add)
+mutate(data,column_to_add)
 
 **Use cases**
 Add a single columns based on another one (In this example some rows will have NA, but for purpose of example it would be ok)
@@ -158,3 +158,102 @@ drug_use %>%
   filter(age>21) %>%
   summarise(mysum = sum(`cocaine-use`))
 ```
+
+
+### Slice
+
+**SLICE** lets you index rows by their locations. Can slice where there is grouping if specified. It is has helper functions that apply to certain use cases. 
+
+**USAGE**
+slice(data, integer row, .preserve)
+
+**Use cases**
+With it you can select, remove or duplicate rows. With the use of helper functions you can get the top rows, last rows or random values.
+
+***Slice***
+
+Select a single row from the dataframe.
+```{r}
+drug_use %>%
+  slice(1)
+```
+
+***Slice Head/Tail***
+
+Select the top head rows from the dataframe.
+
+```{r}
+drug_use %>%
+  slice_head(n = 5)
+```
+
+Select the last five rows from the dataframe. 
+
+```{r}
+drug_use %>%
+  slice_tail(n = 5)
+```
+
+
+***Slice Min/Max***
+
+Get the minimum alcohol-use value of five rows in the dataframe. 
+
+```{r}
+drug_use %>%
+  slice_min(`alcohol-use`,n = 5)
+```
+
+Get the maximum alcohol-use value of five rows in the dataframe.
+```{r}
+drug_use %>%
+  slice_max(`alcohol-use`, n = 5)
+```
+
+
+### Relocate
+
+**RELOCATE** makes it easy to move a set of columns to another location. By default it moves the columns to the front.
+
+**USAGE**
+relocate(.data, columns to move, before, after)
+
+**Use cases**
+Move columns to wherever specified when you need to rearrange the dataframe.
+
+
+Relocate using **after**. Move alcohol-use and frequency to after marijuana-frequency. 
+
+```{r}
+drug_use %>%
+  relocate(`alcohol-use`:`alcohol-frequency`, .after = `marijuana-frequency`)
+```
+
+Relocate using **before**. Move marijuana-use and frequence to before alcohol-use.
+
+```{r}
+drug_use %>%
+  relocate(`marijuana-use`:`marijuana-frequency`, .before = `alcohol-use`)
+```
+
+
+### Arrange
+
+**ARRANGE** makes it easy to move a set of rows to another location. It ignroes grouping unless explicitly mentioned.
+
+**USAGE**
+relocate(.data, variable/desc/function, .by_group = TRUE )
+
+**Use cases**
+Move rows to wherever specified when you need to rearrange the dataframe.In addition you can arrange in descending order, variable, or function specified.
+
+
+Sort marijuana use in ascending order, this will rearrange other values as well. 
+
+```{r}
+drug_use %>%
+  arrange(`marijuana-use`)
+```
+
+
+
