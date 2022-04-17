@@ -1,6 +1,7 @@
 ---
 title: "TidyVerse Create"
 author: "Al Haque"
+editor: "Benson Toi"
 date: "3/30/2022"
 output: html_document
 ---
@@ -105,6 +106,12 @@ head(Clean_Disney %>%
 head(Clean_Disney %>%
   arrange(desc(inflation_adjusted_gross)))
 ```
+## Tibble
 
+A tibble is a data frame that is designed for presentation.
+```{r tibble}
 
- 
+Clean_Disney_new <- as_tibble(Clean_Disney)
+print(Clean_Disney_new)
+
+```
