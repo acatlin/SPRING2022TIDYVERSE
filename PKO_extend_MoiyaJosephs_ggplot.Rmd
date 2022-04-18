@@ -1,0 +1,299 @@
+---
+title: "DATA607ProjectTidyExtend"
+author: "PK O'Flaherty"
+date: '2022-04-17'
+output:
+  html_document:
+    highlight: pygments
+    theme: spacelab
+    toc: true
+    toc_float: true
+  pdf_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+<br>
+
+* * *
+
+# TidyVerse CREATE ggplot2
+
+**I picked Moiya Joseph's TidyVerse CREATE project to extend.  I removed a second dataset from the geom_point() layer in the final map graphic and edited the original segment for flow, language and formatting.  See the 'TidyVerse EXTEND' section for additional code.**
+
+>
+>title: "Tidyverse CREATE"  
+>author: "Moiya Josephs"  
+>date: "4/9/2022"  
+>output: html_document  
+>
+
+<br>
+
+* * *
+
+## Introduction
+
+ggplot2 is a package in `tidyverse` that allows us to visualize our data and make it clearer when presenting our findings. In this document I plan to show how to use ggplot features that are not just bar plots or line charts.
+
+<br>
+
+### Load Libraries
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+<br>
+
+### Read Data
+
+The data I will be using to demo the different features of ggplot is one that rates Ramen. It allows me to show how ggplot graphs discrete and continuous variables.
+
+```{r}
+filelocation <- "https://raw.githubusercontent.com/moiyajosephs/Data607-Project2/main/ramen-ratings.csv"
+ramen_ratings <- read.csv(filelocation)
+
+```
+
+<br>
+
+* * *
+
+## GGPLOT
+
+<br>
+
+### Geom Count
+
+When plotting two discrete variables `geom_count` is recommended. `Geom_Count` is a variation of `geom_point` and maps the frequency for each observation. It has a legend for the dots, the larger the dot the more of that value there is in the data.
+
+Both discrete 
+```{r}
+ggplot(ramen_ratings, aes(Brand, Style, color = Style)) + geom_count()
+ggplot(ramen_ratings, aes(Brand, Style, color = Style)) + geom_count() + theme(axis.text.x = element_blank() )
+```
+
+<br>
+
+### Geom Col 
+
+`Geom col` is identical to geom_bar since it shows bar charts. The difference with `geom_col` is that it allows you to plot the bars relative to the data instead of the number of types x occurs like `geom_bar`.
+
+Below I am able to plot the brand of ramen and the ratings they received.
+
+```{r, warning=FALSE}
+ramen_ratings$Stars <- as.numeric(ramen_ratings$Stars)
+ggplot(head(ramen_ratings,10), aes(Brand, Stars, fill = Style) ) + geom_col() +  theme(axis.text.x = element_text(angle = -30, vjust = 1, hjust = 0))
+```
+
+<br>
+
+### Geom Map
+
+This is the most interesting of the data and if data has regions specified, you can map where each point is. The function `map_data` allows you to get the longitude and latitude of a region specified, like state, or country. The ramen data is international, luckily we can also set `map_data` to world, so it collects all the coordinates of countries in the world.
+
+```{r}
+ramen_ratings$Stars <- as.numeric(ramen_ratings$Stars)
+map <- map_data("world")
+
+# select region in ramen ratings, get set
+regions <- unique(ramen_ratings$Country)
+
+# select country in map, select 
+m1 <- map %>% filter(region %in% regions) 
+m1 <- distinct(m1, region, .keep_all = TRUE)
+```
+
+This data is very large, however, and we do not need all the coordinates for the same country. So I used the `distinct` function in order to get unique row values for each country in `map_data` and call it `map_regions.set`.
+
+```{r}
+life.exp.map <- left_join(ramen_ratings, m1, by = c("Country"="region"))
+map.regions.set <- distinct(map, region, .keep_all = TRUE)
+```
+
+Now that I have the unique regions, I can left join it with the map data where the country equals the region. That way we have the ramen information from the original dataset, joined with the coordinates for the region of each plot,
+
+```{r, warning=FALSE}
+ramen.map <- left_join(ramen_ratings, map.regions.set, by = c("Country"="region"))
+ggplot() +
+  geom_map(
+    data = map, map = map,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", size = 0.1
+  ) +
+  geom_point(
+    data = life.exp.map,
+    aes(long, lat, color = Style),
+    alpha = 0.7
+  )
+```
+
+The map above shows where the style of ramens are located around the world. At a glance, a person could see that pack is a popular ramen style.
+
+<br>
+
+* * *
+
+## Conclusion
+
+`Ggplot` is a very powerful library within tidyverse that allows you to make various visualizations based on your data. With visualizations, data scientists can present any key findings in an easy to understand way.
+
+<br>
+
+* * *
+
+## References
+
+(1) [https://tidyverse.tidyverse.org/articles/paper.html](https://tidyverse.tidyverse.org/articles/paper.html)
+
+(1) [https://www.kaggle.com/datasets/residentmario/ramen-ratings?resource=download](https://www.kaggle.com/datasets/residentmario/ramen-ratings?resource=download)
+
+(1) [https://rdrr.io/cran/ggplot2/man/map_data.html](https://rdrr.io/cran/ggplot2/man/map_data.html)
+
+(1) [https://datavizpyr.com/how-to-make-world-map-with-ggplot2-in-r/](https://datavizpyr.com/how-to-make-world-map-with-ggplot2-in-r/)
+
+<br>
+
+* * *
+
+# TidyVerse EXTEND ggplot2
+
+**Here we extend the project with additional things you can do with ggplot.  I adapted a number of examples from a 2021 medium article by Keith McNulty, [towardsdatascience.com/ten-random-but-useful-things-to-know-about-ggplot2](https://towardsdatascience.com/ten-random-but-useful-things-to-know-about-ggplot2-197dc4439d10)**
+
+<br>
+
+## Additional Examples
+
+<br>
+
+### Plot a Math Function
+
+**With ggplot you can chart a regular math function.  Below is an example with the sin function.**
+
+```{r}
+ggplot() +
+  xlim(-10, 10) +
+  geom_function(fun = function(x) sin(x))
+```
+
+
+**This can be useful if you want to over lay the function with your data to establish a pattern.  We can add the function as a layer to the ggplot of the data's longitude (x) and latitude (y) and see that they are *not* described by the function 5*sin(x/5).**
+
+```{r}
+# Create a plot of the longitude and latitude of the countries
+exp1 <- ggplot(data = life.exp.map, 
+             aes(x = long, y = lat, color = as.factor(Style))) +
+             geom_point()
+
+# Overlay a sin function on the above plot
+exp1 + geom_function(fun = function(x) 5*sin(x/5))
+```
+
+<br>
+
+* * *
+
+### Use Assignment
+
+**In the above example I assigned a simpler graph to a variable `exp1`.  This allows me to repeat the base graph without having to repeat the code.  This also touches on the topic of inheritance because I passed aesthetic information into ggplot instead of into the geom_point() layer.  In this way my additional layer inherited the aesthetic from the ggplot that it was layered onto.  This is something to consider as your build out projects so that your code is clean and intentional.**
+
+**Note in this case, with a generic math function, inheritance wouldn't have an effect, but see the final example for where inheritance would create an error and how to disinherit.**
+
+```{r, eval=FALSE}
+# Repeat of previous code chunk with additional notation
+
+# Here the data and aes information is being passed to the ggplot function so it is used by the geom_point() layer.
+exp1 <- ggplot(data = life.exp.map, 
+             aes(x = long, y = lat, color = as.factor(Style))) +
+             geom_point()
+
+# When we add the geom_function() layer it inherits the data and aes information used in exp1.
+exp1 + geom_function(fun = function(x) 5*sin(x/5))
+
+# It's the same as if we had written
+exp1 <- ggplot(data = life.exp.map, 
+             aes(x = long, y = lat, color = as.factor(Style))) +
+             geom_point() + 
+             geom_function(fun = function(x) 5*sin(x/5))
+
+# But if the data and aes were passed to the geom_point() layer than it wouldn't be inherited by the second layer.  The difference isn't evident in this example but it's something to keep in mind.
+exp1 <- ggplot() +
+             geom_point(data = life.exp.map, 
+             aes(x = long, y = lat, color = as.factor(Style))) + 
+             geom_function(fun = function(x) 5*sin(x/5))
+```
+
+<br>
+
+* * *
+
+### Density Curves
+
+**Here we plot density function over a histogram.  However note we set y to be `..density..` otherwise the histogram would default to count and be on a different scale than the density layer.  Note I had to cast the Star column as numeric to be plotted.**
+
+```{r, warning=FALSE}
+# Overlay a density layer over a histogram layer with the same y-scale
+exp2 <- ggplot(data = life.exp.map, aes(x = as.numeric(Stars), y = ..density..)) +
+  geom_histogram(fill = "lightblue", bins = 30) +
+  geom_density(fill = "pink", alpha = 0.4)
+
+exp2
+```
+
+<br>
+
+* * *
+
+### Uninherited layers
+
+**Here we overlay the example above with a normal distribution.**
+
+First we remove unrated records and recast the values as numbers and calculate the normal distributions mean and standard deviation.
+
+When we add the layer with the normal density function we have to disinherit the aesthetic information which we can do with `inherit.aes = FALSE`.
+
+```{r, warning=FALSE}
+# Tidy data to be easier to work with
+life.exp.map2 <- filter(life.exp.map, Stars!= "Unrated")
+life.exp.map2$Stars <- as.numeric(life.exp.map2$Stars)
+
+# Calculate the mean and standard deviation for the normal distribution
+stars_mean <- mean(life.exp.map2$Stars)
+stars_sd <- sd(life.exp.map2$Stars)
+
+# plot the prior example with the additional normal density layer - Note the disinheritance
+exp2 + geom_function(
+          fun = function(x) dnorm(x, mean = stars_mean, sd = stars_sd), 
+          linetype = "dashed",
+          inherit.aes = FALSE
+  )
+```
+
+***Looking at the plot above notice how people are inordinately inclined to give a brand five stars or even zero stars which indicates to me an issue with relying on survey data for quality.***
+
+<br>
+
+**Here is the above plot repeated without the disinheritance to demonstrate the error.**
+
+```{r, warning=FALSE, eval=FALSE}
+# Repeated plot without the disinheritance
+exp2 + geom_function(
+          fun = function(x) dnorm(x, mean = stars_mean, sd = stars_sd), 
+          linetype = "dashed")
+```
+
+>Error in 'f()':  
+>! Aesthetics must be valid computed stats. Problematic aesthetics(s): y = ..density...  
+>Did you map your stat in the wrong layer?  
+
+<br>
+
+* * *
+
+## References
+
+**Check out the examples as they were originally described by the author, Keith McNulty.  He goes on to describe an extended final example that is very detailed, beautiful and instructive.**
+
+Keith McNulty (2021) [towardsdatascience.com/ten-random-but-useful-things-to-know-about-ggplot2](https://towardsdatascience.com/ten-random-but-useful-things-to-know-about-ggplot2-197dc4439d10)
