@@ -241,6 +241,50 @@ ggplot(data = Clean_Disney, aes(release_date, inflation_adjusted_gross)) +
   theme(axis.text.x = element_text(angle = 90)) 
 ```
 
+## Create summary to show the result of data mining
+
+We can create summary to show how many observation and variable has been eliminated. as we can see 59 observation deleted because the ratings are empty or not rated. Total_gross deleted because inflation_adjusted_gross is the better choice to show the fact.
+
+```{r}
+
+summary(Disney_data)
+summary(Clean_Disney)
+```
+
+
+
+## ggplot to show the comparison of data
+
+From the plot1 we can see majority of the earnings are from G rated movies, however, does that mean G rate movie has the highest avg earnings per movies?
+The answer is yes. We calculate the sum, count and the avg first, then we make a plot 2. 
+We can see G rated movies are still hold the highest earnings in avg, however, PG and PG-13 is tie to each other now. As a shareholder, they would love to see Disney produce more G rated movies because the ROI on G rated movie **maybe** the best without see the the cost part for now. 
+```{r}
+
+
+ggplot(Clean_Disney, aes(x=mpaa_rating, y=inflation_adjusted_gross)) +
+geom_bar(stat="identity", position=position_dodge())
+
+
+sum <- aggregate(x= Clean_Disney$inflation_adjusted_gross,
+          by= list(Clean_Disney$mpaa_rating),
+          FUN=sum)
+
+count <- aggregate(Clean_Disney$inflation_adjusted_gross, by=list(Clean_Disney$mpaa_rating), FUN=length)
+
+sum$count <- count$x
+
+sum$avg <- sum$x/count$x
+
+colnames(sum) <- c('mpaa_rating','inflation_adjusted_gross','count','avg_gross')
+
+sum
+
+ggplot(sum, aes(x=mpaa_rating, y=avg_gross)) +
+geom_bar(stat="identity", position=position_dodge())
+
+```
+ 
+=======
 ### Changing Column Types using Lubridate
 It looks like there is quite a lot of data to plot, and it's really making the x-axis messy. The scale of the y-axis also seems to be very large. We can use tidyverse to fix this of course!
 
@@ -300,4 +344,5 @@ ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
   ylab("Gross Amount (Divided by 100,000)") +
   xlab("Date Released") 
 ```
+
 
