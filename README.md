@@ -27,3 +27,6 @@ https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKOFlaherty_ggplot2_cre
 * Benson Toi and Jay Lee
 * How to overview data before performing analysis
 * https://github.com/jayleecunysps/AssignmentforSPS/blob/main/Benson_Jay_tinyverse.Rmd
+
+* Ahmed Elsaeyed Tidyverse EXTEND:
+https://github.com/aelsaeyed/SPRING2022TIDYVERSE/blob/main/Al'sDyplr.Rmd
