@@ -94,6 +94,27 @@ nfl_passing_2009_2018 %>%
   geom_point()
 ```
 
+We can take this one step further using the **scales** and customize the tick marks so that they don't take up that much space in the visualization, add title, and customize color palatte.
+
+```{r customize-ticks}
+library(scales)
+
+nfl_passing_2009_2018 %>%
+    filter(Pos=="QB",Age>30,G>13) %>%
+    ggplot(aes(x=Age, y=Yds, color=Yds)) +
+      geom_point() +
+      scale_y_continuous(label = label_number(
+        scale = .001,
+        suffix = "k"
+      )) +
+      scale_color_viridis_c(label = label_number(
+        scale = .001,
+        suffix = "k"
+      )) +
+      labs(title = "2009-2018 QB +30")
+  
+```
+
 ### AES
 **AES** it's an important part of the ggplot structure. In order to specify the axes, we need to use the aes() function. aes is short for “aesthetic”, and it is where we tell ggplot what columns we want to use for different parts of the plot.
 
@@ -119,6 +140,7 @@ nfl_passing_2009_2018 %>%
 ```
 
 In this case **geom_point()** is telling R and qqplot to plot a single point for each piece of data, thus we would get a scatterplot.
+
 
 ### ggplot2 cheat sheet
 More information on various ggplots to use, as well as additional aesthetics can be found here: https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf .
