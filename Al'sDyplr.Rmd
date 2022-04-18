@@ -1,6 +1,8 @@
+
 ---
 title: "TidyVerse Create"
 author: "Al Haque"
+editor: "Benson Toi"
 date: "3/30/2022"
 output: html_document
 ---
@@ -105,6 +107,197 @@ head(Clean_Disney %>%
 head(Clean_Disney %>%
   arrange(desc(inflation_adjusted_gross)))
 ```
+## Tibble
 
+A tibble is a data frame that is designed for presentation.
+```{r tibble}
 
+Clean_Disney_new <- as_tibble(Clean_Disney)
+print(Clean_Disney_new)
+
+```
+=======
+---
+title: "TidyVerse Create"
+author: "Al Haque"
+date: "3/30/2022"
+output: 
+  html_document:
+    df_print: paged
+    theme: cosmo
+---
+### TidyVerse Project
+ Tidyverse is so commonly used in data science that it helps data scientists manipulate,tidy,transform and visualize data.The tidyverse contains a bunch of packages that helps beginners or expert manage data.In this project I will demonstrate the following package in the tidyverse this is the dyplr package.
  
+
+### Dyplr 
+  Dyplr is used in data science to help the user clean and manipulate data in a manner which they fill fitting. 
+  
+  
+  ## Calling the Library and Reading the data 
+ Here we imported the tidyverse packages which contains the package dplyr but you can also see other packages as well such as tibble,readr, and more.I also imported a data set from kaggle which contains information about the Disney movies. 
+
+```{r}
+library(tidyverse)
+library(lubridate)
+Disney_data <- read.csv("https://raw.githubusercontent.com/AldataSci/TidyVerse/main/disney_movies.csv",sep=",",header=TRUE)
+```
+
+### Looking at the data
+  Let's take a look at the data and see what we can understand from it.We can see all the movie_title,the genre and the release date and its earnings as well. 
+```{r}
+head(Disney_data)
+```
+
+### Cleaning The Data
+  We can see that there are a select few columns and we can remove from our data if we wish to
+```{r}
+## You can use the select function to select columns based on their names 
+
+head(select(Disney_data,movie_title,release_date,genre,mpaa_rating,inflation_adjusted_gross))
+
+## Alternatively you can also use the pipes dpylr to get the same results!! 
+
+head(Disney_data %>%
+  select(movie_title,release_date,genre,mpaa_rating,inflation_adjusted_gross))
+
+## A much simpler way to get the columns you want without writing the whole columns name out is to write a minus sign next to the column you don't want.
+
+head(Disney_data %>%
+  select(-total_gross))
+
+```
+
+### Filtering the Data
+  We can also filter out our data to make it more readable or simply more easy to understand. In our case we can see there is a lot of empty values under the ratings columns which simply fills the data with empty space and harder to understand.
+  
+```{r}
+## The filter function helps us filter out the data I filtered out the observations in the rating columns that contains empty space or if the ratings says not rated
+
+head(filter(Disney_data,mpaa_rating !="" & mpaa_rating !="Not Rated"))
+
+## We can also use dplyr pipes to filter it out
+
+head(Disney_data %>%
+  filter(mpaa_rating !="" & mpaa_rating != "Not Rated"))
+
+```
+### Renaming Columns 
+ We can also rename our columns in your dataset if the name doesn't make sense or if the name is ugly to you 
+ 
+```{r}
+## We can use base R rename function to simply rename our column names in our dataset.In this case we will rename our movie_title column to Movies 
+
+head(names(Disney_data)[names(Disney_data) == "movie_title"] <- "Movies")
+
+### Alternatively a simpler and faster way to do this is to use dyplr rename function where we will pipe the disney_data rename the columns we want and get a new dataset with the changed column names saved to it the new name you want to give goes to the left of =, in this case it is Movie_Titles I want to rename to while the right of = is the old name of the column Movies. 
+
+head(Disney_data %>%
+  rename(Movie_Titles=Movies))
+```
+### Combining Everything with the Pipe Operator
+```{r}
+## Here we can combine multiple pipes command as one we can put all the changes we did to the dataset into one R pipe command that is the awesome power of the pipe operator.. and we save our data in a dataframe called Clean Disney.. 
+
+head(Clean_Disney <- Disney_data %>%
+  rename(movies=Movies) %>%
+  select(-total_gross) %>%
+  filter(mpaa_rating !="" & mpaa_rating !="Not Rated"))
+
+```
+ 
+## Advanced Usages of the Pipes
+ We can also use dyplr to re-organize our data and we can also perform analysis on our cleaned data now. 
+ 
+```{r}
+## The group-by command helps aggregate your data, aggregate data groups your data into a specific category, 
+head(Clean_Disney %>%
+  group_by(release_date))
+  
+```
+```{r}
+## The summarise function helps us perform numerical analysis on our data so using the max function we use the max value of the column. 
+head(Clean_Disney %>%
+  group_by(release_date) %>%
+  summarise(max(inflation_adjusted_gross)))
+
+```
+```{r}
+### We can also use the arrange function to rearrange our data from low-to high with the desc function arranging our data can help provide more additional insights to perform. 
+
+head(Clean_Disney %>%
+  arrange(desc(inflation_adjusted_gross)))
+```
+
+## Ahmed's Extension
+
+### Initial Exploration
+I learned a lot of things from Al's work above, especially when it comes to renaming and selecting columns. I think Al did a lot of good analysis getting the highest grossing movies per release date, and thought the presentation would benefit from some visuals. We can make a simple plot at first, showing the grossing amounts.
+
+```{r initial display}
+
+ggplot(data = Clean_Disney, aes(release_date, inflation_adjusted_gross)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) 
+```
+
+### Changing Column Types using Lubridate
+It looks like there is quite a lot of data to plot, and it's really making the x-axis messy. The scale of the y-axis also seems to be very large. We can use tidyverse to fix this of course!
+
+First I will make the release_date column a little more friendly by changing its type to char using the ymd function from lubridate: 
+```{r changing column type}
+disney_data_fixed <- Clean_Disney %>% 
+  mutate(`release_date` = ymd(release_date) )
+
+head(disney_data_fixed)
+```
+Changing the type of the release_date column to "date" type now allows us to do useful things with the date while graphing, such as change the scale of the x-axis by using date_breaks. This function allows us to specify the interval of dates to display on the graph. So it is not a jumbled mess like above. It will plot all the data points but the x-axis will look a little cleaner. Date_labels allows us to specify how we want the date to be displayed- in this case %b %y means I want the abbreviated month and the abbreviated year of release.
+```{r date_labels and date_breaks}
+ggplot(data = disney_data_fixed, aes(release_date, inflation_adjusted_gross)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="12 months") 
+```
+
+### Making Large Numbers More Readable
+Next we can do something about the y-axis by dividing the inflation_adjusted_gross column by 100,000.
+
+```{r dividing y-axis}
+disney_data_gross_fixed <- disney_data_fixed %>% 
+  mutate(`gross_fixed` = inflation_adjusted_gross/100000 )
+
+```
+Now when I graph the resulting data the numbers on the y-axis will be more readable. Notice that I also changed the date breaks to be even more clean.
+```{r graphing clean data}
+ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="18 months") 
+```
+
+### Graphing by Genre 
+Another thing we may want to do is visualize the data but broken down by a particular facet- in this case the genre. Using facet_wrap, another ggplot function, I can break my visual out based on genre without creating a new data frame per genre or looping. 
+
+From this data we can see that Disney has always been heavily invested in musicals and adventure stories, and has relatively recently began branching out into other genres like westerns or comedies. 
+
+```{r breaking out graph by genre}
+ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="36 months") +
+  facet_wrap(~ genre)
+```
+
+I will finally add some labels and a title for the final product: 
+
+```{r adding labels}
+ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="4 years") +
+  facet_wrap(~ genre) +
+  ggtitle("Disney Movie Grossing Amounts by Genre") +
+  ylab("Gross Amount (Divided by 100,000)") +
+  xlab("Date Released") 
+```
+

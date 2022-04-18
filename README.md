@@ -29,5 +29,16 @@ https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKOFlaherty_ggplot2_cre
 * https://github.com/jayleecunysps/AssignmentforSPS/blob/main/Benson_Jay_tinyverse.Rmd
 
 
+
 *Al's Dyplr 
 Updated By Benson - tibble is a data frame that is designed for presentation.
+=======
+How to use tidycensus to import census data with spatial geometry seamlessly into R
+by Justin Williams
+https://github.com/justinm0rgan/SPRING2022TIDYVERSE/blob/main/Justin_Williams_tidycensus.Rmd
+
+* Extension of "ggplot2 Basic Scatter Plot Vignette": https://github.com/djunga/SPRING2022TIDYVERSE/blob/main/BrianSingh_Data607_TidyverseCreate.Rmd
+
+* Ahmed Elsaeyed Tidyverse EXTEND:
+https://github.com/aelsaeyed/SPRING2022TIDYVERSE/blob/main/Al'sDyplr.Rmd
+
