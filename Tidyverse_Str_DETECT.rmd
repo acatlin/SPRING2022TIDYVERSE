@@ -1,11 +1,11 @@
 ---
-title: "Data 607 Tidyverse Stringr"
-author: "Alex Moyse, Vyanna Hill"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: Data 607 Tidyverse
+author: Alex Moyse
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
 ---
 
 ## Vigentte Info
@@ -23,6 +23,7 @@ library(tidyverse)
 
 ```{r}
 url.data <- "https://raw.githubusercontent.com/fivethirtyeight/superbowl-ads/main/superbowl-ads.csv"
+
 raw <- read.csv(url(url.data), header = TRUE,) 
 ```
 
@@ -45,40 +46,5 @@ The best thing about this is that you can iterate it across the scope of the dat
 
 
 ```{r}
-print(as_tibble(raw))
-```
-
-## Vignette Extension
-
-### Locating specific string
-
-We can even use String in string location. For our example, let's say super bowl ads want to QA that their urls are all the same length and start at the same position. 
-
-```{r}
-url_check<-str_locate(raw$superbowl_ads_dot_com_url,"superbowl-ads.com")
-unique(url_check)
-```
-
-### String extraction
-
-Another example of Stringr is its string extraction. Let's use str_extract_all to extract all Superbowl ads from Budweiser.
-
-```{r}
-bud<-raw%>%filter(brand=="Budweiser")
-bud$Title<-str_extract(bud$superbowl_ads_dot_com_url,"\\d{4}-budweiser-(.*)")
-
-```
-
-### String replacement
-
-Lets clean up the new title column to display them best as possible. We will use str_replace and str_ to_title for this task in order to remove any black slashes and replicate proper format.
-
-```{r}
-bud$Title<-str_replace(bud$Title,"/"," ")
-bud$Title<-str_replace(bud$Title,"-budweiser-"," ")
-bud$Title<-str_replace_all(bud$Title,"-"," ")
-bud$Title<-str_replace(bud$Title,"\\d{4}","")
-bud$Title<-str_to_title(bud$Title)
-Bud_ads<-bud%>%select(c("Title","year","superbowl_ads_dot_com_url"))
-print(as_tibble(Bud_ads))
+raw
 ```

@@ -1,19 +1,20 @@
 ---
-title: "Tidyverse project"
-author: "Jay Lee and Benson Toi and Al Haque "
+title: "Tidyverse project Extended"
+author: "Originally: Jay Lee and Benson Toi  Extended By: Alex Moyse"
 date: "4/8/2022"
 output: 
   html_document:
-     theme: yeti
-     toc: true
-     toc_float: true
+    df_print: paged
+    toc: true
+    toc_float: true
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Project details
+<H1> Project details </H1>
 
 Our task here is to Create an Example.Using one or more TidyVerse packages, and any dataset from fivethirtyeight.com or Kaggle, create a programming sample “vignette” that demonstrates how to use one or more of the capabilities of the selected TidyVerse package with your selected dataset.
 
@@ -22,9 +23,10 @@ URL: https://raw.githubusercontent.com/fivethirtyeight/data/master/hate-crimes/h
 
 
 
-# Tidyverse project - prepare the data
+<H1> Tidyverse project - prepare the data </H1>
 
-## Step 1 Load Library 
+<H2> Step 1 Load Library </H2> 
+
 
 We need to load the Library first
 
@@ -39,7 +41,7 @@ Tidyverse has following packages
 library(tidyverse)
 ```
 
-## Step 2 Load data 
+<h2> Step 2 Load data </H2> 
 
 Then we load it into R
 
@@ -51,7 +53,7 @@ hate_url <-read.csv(hate_url)
 head(hate_url)
 ```
 
-## Step 3 add new column with calcalation
+<H2>  Step 3 add new column with calcalation </H2> 
 
 We replace the na to 0 and sum the hate crime cases together.
 
@@ -65,7 +67,7 @@ head(haterate)
 
 ```
 
-# Tidyverse project - use function from Tidyverse
+# Tidyverse project - use funtion from Tidyverse
 
 ## glimpse data
 
@@ -78,7 +80,7 @@ glimpse(haterate)
 
 ## Select Data
 
-We select the column that we need when some column is not needed to minimize the size of the data.
+<H2> We select the column that we need when some column is not needed to minimize the size of the data. </H2> 
 
 ```{r}
 haterate <- haterate %>%
@@ -88,7 +90,7 @@ head(haterate)
 
 ```
 
-## create summary 
+<H2>  create summary </H2> 
 
 We create a summary to have a overview of the data, it is helpful to quick check if there is any outliner. 
 
@@ -104,29 +106,50 @@ we try to visualize the count of unemployment and hate crimes cases.
 ggplot(haterate, aes(x=hate_rate_sum_per100k)) + geom_histogram(bins = 30) 
 ggplot(haterate, aes(x=share_unemployed_seasonal)) + geom_histogram(bins = 30)
 ```
------
-
-## Vignette Extension (Al Haque)
 
 
+<H1> And now, the extension </H1> 
 
-## Filtering the Data
+<H2> What is it? </H2>
 
-we can use the filter function within dplyr to filter certain income levels for instance, I filtered household_income that were above 45K. 
+Going to be brutally honest, my friend showed me this package for R and it piqued my interest, its named corrplot. It makes a wonderful chart to see relationships between things 
 
-```{r}
-Greaterthan45K <- haterate %>%
-  filter(median_household_income >= "45000")
-```
-
-
-## ggplot
-
-
-Here we can graph the filtered results on a graph using ggplot.
+<H2> First things first, let's load it in </H2>
 
 ```{r}
-ggplot(Greaterthan45K,aes(x=median_household_income)) +
-  geom_histogram(bins=30)
+library(corrr)
+library(GGally)
+```
+<H2> Data Grab </H2>
+
+
+This is pretty much the same as above!
+
+```{r}
+haterate <-hate_url %>%
+  replace(is.na(.), 0) %>%
+  mutate(hate_rate_sum_per100k = rowSums(.[11:12]))
 
 ```
+
+<H2> And now the addition </H2>
+
+Practically corr demontrates relationships between variables, as well as the degree of that relationship
+
+```{r}
+haterate_corr <- haterate %>%  select(-"state") %>% correlate()     %>%   rearrange() %>%  # rearrange by correlations
+       shave() # Shave off the upper triangle for a clean result
+fashion(haterate_corr)
+
+ggcorr(haterate_corr, geom = "circle", hjust = 0.75, size = 5, layout.exp = 4)
+```
+
+<H1> Conclusion </H1>
+
+I want to thank Jay Lee and Benson Toi for starting this out, it made a fantastic start to see the data as well as a chart, and I wanted to extend it to use more variables!
+
+More info on the release can be found here:
+
+https://www.tidyverse.org/blog/2020/12/corrr-0-4-3/
+
+Alex 
