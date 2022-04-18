@@ -2,7 +2,10 @@
 title: "TidyVerse Create"
 author: "Al Haque"
 date: "3/30/2022"
-output: html_document
+output: 
+  html_document:
+    df_print: paged
+    theme: cosmo
 ---
 ### TidyVerse Project
  Tidyverse is so commonly used in data science that it helps data scientists manipulate,tidy,transform and visualize data.The tidyverse contains a bunch of packages that helps beginners or expert manage data.In this project I will demonstrate the following package in the tidyverse this is the dyplr package.
@@ -17,6 +20,7 @@ output: html_document
 
 ```{r}
 library(tidyverse)
+library(lubridate)
 Disney_data <- read.csv("https://raw.githubusercontent.com/AldataSci/TidyVerse/main/disney_movies.csv",sep=",",header=TRUE)
 ```
 
@@ -106,5 +110,74 @@ head(Clean_Disney %>%
   arrange(desc(inflation_adjusted_gross)))
 ```
 
+## Ahmed's Extension
 
- 
+### Initial Exploration
+I learned a lot of things from Al's work above, especially when it comes to renaming and selecting columns. I think Al did a lot of good analysis getting the highest grossing movies per release date, and thought the presentation would benefit from some visuals. We can make a simple plot at first, showing the grossing amounts.
+
+```{r initial display}
+
+ggplot(data = Clean_Disney, aes(release_date, inflation_adjusted_gross)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) 
+```
+
+### Changing Column Types using Lubridate
+It looks like there is quite a lot of data to plot, and it's really making the x-axis messy. The scale of the y-axis also seems to be very large. We can use tidyverse to fix this of course!
+
+First I will make the release_date column a little more friendly by changing its type to char using the ymd function from lubridate: 
+```{r changing column type}
+disney_data_fixed <- Clean_Disney %>% 
+  mutate(`release_date` = ymd(release_date) )
+
+head(disney_data_fixed)
+```
+Changing the type of the release_date column to "date" type now allows us to do useful things with the date while graphing, such as change the scale of the x-axis by using date_breaks. This function allows us to specify the interval of dates to display on the graph. So it is not a jumbled mess like above. It will plot all the data points but the x-axis will look a little cleaner. Date_labels allows us to specify how we want the date to be displayed- in this case %b %y means I want the abbreviated month and the abbreviated year of release.
+```{r date_labels and date_breaks}
+ggplot(data = disney_data_fixed, aes(release_date, inflation_adjusted_gross)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="12 months") 
+```
+
+### Making Large Numbers More Readable
+Next we can do something about the y-axis by dividing the inflation_adjusted_gross column by 100,000.
+
+```{r dividing y-axis}
+disney_data_gross_fixed <- disney_data_fixed %>% 
+  mutate(`gross_fixed` = inflation_adjusted_gross/100000 )
+
+```
+Now when I graph the resulting data the numbers on the y-axis will be more readable. Notice that I also changed the date breaks to be even more clean.
+```{r graphing clean data}
+ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="18 months") 
+```
+
+### Graphing by Genre 
+Another thing we may want to do is visualize the data but broken down by a particular facet- in this case the genre. Using facet_wrap, another ggplot function, I can break my visual out based on genre without creating a new data frame per genre or looping. 
+
+From this data we can see that Disney has always been heavily invested in musicals and adventure stories, and has relatively recently began branching out into other genres like westerns or comedies. 
+
+```{r breaking out graph by genre}
+ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="36 months") +
+  facet_wrap(~ genre)
+```
+
+I will finally add some labels and a title for the final product: 
+
+```{r adding labels}
+ggplot(data = disney_data_gross_fixed, aes(release_date, gross_fixed)) +
+  geom_line(color = "blue")+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_x_date(date_labels="%b %y",date_breaks  ="4 years") +
+  facet_wrap(~ genre) +
+  ggtitle("Disney Movie Grossing Amounts by Genre") +
+  ylab("Gross Amount (Divided by 100,000)") +
+  xlab("Date Released") 
+```
