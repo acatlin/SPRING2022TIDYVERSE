@@ -19,8 +19,17 @@ Initial Description and Link:
 * How to use the pipe operator to organize data in R using tidyverse's Dyplr
 * https://github.com/AldataSci/SPRING2022TIDYVERSE/blob/main/Al'sDyplr.Rmd
 
+
+* PK O'Flaherty, tidyverse CREATE:
+PKOFlaherty_ggplot2_create.Rmd
+https://github.com/acatlin/SPRING2022TIDYVERSE/blob/main/PKOFlaherty_ggplot2_create.Rmd
+
 * Benson Toi and Jay Lee
 * How to overview data before performing analysis
 * https://github.com/jayleecunysps/AssignmentforSPS/blob/main/Benson_Jay_tinyverse.Rmd
 
 * Extension of "ggplot2 Basic Scatter Plot Vignette": https://github.com/djunga/SPRING2022TIDYVERSE/blob/main/BrianSingh_Data607_TidyverseCreate.Rmd
+
+* Ahmed Elsaeyed Tidyverse EXTEND:
+https://github.com/aelsaeyed/SPRING2022TIDYVERSE/blob/main/Al'sDyplr.Rmd
+
