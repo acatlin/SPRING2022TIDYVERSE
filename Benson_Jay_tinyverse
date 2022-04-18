@@ -1,6 +1,6 @@
 ---
 title: "Tidyverse project"
-author: "Jay Lee and Benson Toi"
+author: "Jay Lee and Benson Toi and Al Haque "
 date: "4/8/2022"
 output: 
   html_document:
@@ -65,7 +65,7 @@ head(haterate)
 
 ```
 
-# Tidyverse project - use funtion from Tidyverse
+# Tidyverse project - use function from Tidyverse
 
 ## glimpse data
 
@@ -104,4 +104,29 @@ we try to visualize the count of unemployment and hate crimes cases.
 ggplot(haterate, aes(x=hate_rate_sum_per100k)) + geom_histogram(bins = 30) 
 ggplot(haterate, aes(x=share_unemployed_seasonal)) + geom_histogram(bins = 30)
 ```
+-----
 
+## Vignette Extension (Al Haque)
+
+
+
+## Filtering the Data
+
+we can use the filter function within dplyr to filter certain income levels for instance, I filtered household_income that were above 45K. 
+
+```{r}
+Greaterthan45K <- haterate %>%
+  filter(median_household_income >= "45000")
+```
+
+
+## ggplot
+
+
+Here we can graph the filtered results on a graph using ggplot.
+
+```{r}
+ggplot(Greaterthan45K,aes(x=median_household_income)) +
+  geom_histogram(bins=30)
+
+```
