@@ -96,3 +96,35 @@ nfl_passing_2009_2018 %>%
 
 ### ggplot2 cheat sheet
 More information on various ggplots to use, as well as additional aesthetics can be found here: https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf .
+
+
+***
+
+### Extension
+
+Number of interceptions vs number of times sacked colored by age. You can change the color scale by passing color names to the `low` and `high` parameters in `scale_colour_gradient`.
+```{r}
+ggplot(data=nfl_passing_2009_2018) +
+  geom_point(aes(x=Int, y=Sk, color=Age))  + 
+  scale_colour_gradient(low="black", high="red")
+```
+
+
+A scatterplot of the number of times sacked vs number of interceptions for the Houston Texans and the Carolina Panthers. Add the `shape` and `color` parameters to aes() to better discern between the two teams. You can also change the axis labels with xlab() and ylab().
+```{r}
+hou_df <- nfl_passing_2009_2018 %>% 
+  filter(Tm=="HOU")
+
+car_df <- nfl_passing_2009_2018 %>% 
+  filter(Tm=="CAR")
+
+hou_car_df <- rbind(hou_df, car_df)
+
+ggplot(data=hou_car_df) +
+  geom_point(aes(x=Int, y=Sk, shape=Tm, color=Tm), size=3) +
+  labs(title="Houston Texans vs Carolina Panthers") +
+  xlab("Number of Interceptions") + 
+  ylab("Number of Times Sacked")
+```
+
+***
