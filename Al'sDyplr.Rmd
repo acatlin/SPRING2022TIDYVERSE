@@ -106,5 +106,25 @@ head(Clean_Disney %>%
   arrange(desc(inflation_adjusted_gross)))
 ```
 
+## dplyr functions mutate() & count()
+(D Plunkett - tidyverse EXTEND)
+We want to answer the question: How many movies came out each year?   
+
+1. Use `mutate()`, which adds new variables, to create a year field
+2. The `str_sub()` function (from `stringr` library, included with tidyverse) to take the first 4 characters of the `release_date` field, which contain the year.
+3. Use the `count()` to count the unique values in `year`
+
+We also using piping (as explained above %>%).
+
+```{r}
+Clean_Disney %>% 
+#the new variable year with get a sub string of release_date
+#starting with character 1 and ending with character 4
+  mutate(year = 
+           str_sub(release_date, 1,4)) %>%
+#then count the unique values of year
+  count(year)
+```
+
 
  
