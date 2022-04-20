@@ -1,0 +1,310 @@
+---
+title: "DPLYR Vignette"
+author: "Juan Falck"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# DPLYR
+
+## Introduction
+DPLYR is one of the Packages included in **TIDYVERSE**. The package simplifies the language used to select pieces of data set. It makes it simple to select columns, row, add columns and summarise data by groups or the results of a formula derived from the content of rows and columns. Dyplyr also allows you to rearrange rows or columns and select sections of the dataframe. 
+
+## Intialization
+Let's load libraries we will need.
+
+```{r}
+#We will used readr to read in a file to be used for the examples
+library(readr)
+library(dplyr)
+```
+
+If error, please ensure library is installed before by using the following command.  **install.packages("dplyr")** or **install.packages("readr")**
+
+Let's load a data set we will use for testing DPLYR. We will load from **FiveThirtyEight** a dataset about **Drug Use by Age**
+
+```{r}
+drug_use <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/drug-use-by-age/drug-use-by-age.csv")
+```
+
+
+## Main functions
+
+### Select  
+**SELECT** allows us to easily select **COLUMNS** from a data set.
+
+**USAGE**  
+select(data,column1,columns2..columnn)
+
+**Use cases**  
+Select a single column
+
+```{r}
+drug_use %>%
+  select(age) %>%
+  head()
+```
+
+Select multiple columns.
+
+```{r}
+drug_use %>%
+  select(age,`cocaine-use` ) %>%
+  head()
+```
+
+You can select consecutive columns by using **:**
+
+```{r}
+drug_use %>%
+  select(age:`marijuana-use` ) %>%
+  head()
+```
+
+
+### Filter
+**FILTER** allows of to select a subset of **ROWS** from the dataframe
+
+**USAGE**
+
+filter(data,expression)
+
+**Use cases**
+
+Filtering by one criterion
+```{r}
+drug_use %>%
+  filter(age>20)
+```
+
+
+Filtering by two criteria with an **AND**
+```{r}
+drug_use %>%
+  filter(age>20 & `marijuana-use` <20)
+```
+
+
+Filtering by two criteria with an **OR**
+```{r}
+drug_use %>%
+  filter(age>20 | `marijuana-use` <20)
+```
+
+
+Combining **SELECT** and **FILTER**
+```{r}
+drug_use %>%
+  select(age,`alcohol-use`,`marijuana-use`) %>%
+  filter(`alcohol-use`<20)
+```
+
+
+### Mutate
+**MUTATE** allows us to add columns to our dataframes, which can be the result of operations between the existing ones.
+
+**USAGE**
+
+mutate(data,column_to_add)
+
+**Use cases**
+Add a single columns based on another one (In this example some rows will have NA, but for purpose of example it would be ok)
+
+```{r}
+drug_use %>%
+  mutate(age_months = as.numeric(age)*12) %>%
+  select(age,age_months)
+```
+
+
+### Summarise
+
+**SUMMARISE** creates a new data frame. It will have one (or more) rows for each combination of grouping variables; if there are no grouping variables, the output will have a single row summarising all observations in the input. It will contain one column for each grouping variable and one column for each of the summary statistics that you have specified.
+
+**USAGE**  
+summarise(data, summary1, summar2, summaryn)
+
+**Use cases**
+
+Output the number of records in the dataframe.
+
+```{r}
+drug_use %>%
+  summarise(records = n())
+```
+
+Output the number of records by age-group
+```{r}
+drug_use %>%
+  group_by(age) %>%
+  summarise(records = n())
+```
+
+Sum a column under criteria.
+
+```{r}
+drug_use %>%
+  filter(age>21) %>%
+  summarise(mysum = sum(`cocaine-use`))
+```
+
+
+### Slice
+
+**SLICE** lets you index rows by their locations. Can slice where there is grouping if specified. It is has helper functions that apply to certain use cases. 
+
+**USAGE**  
+slice(data, integer row, .preserve)
+
+**Use cases**  
+With it you can select, remove or duplicate rows. With the use of helper functions you can get the top rows, last rows or random values.
+
+**Slice**   
+Select a single row from the dataframe.
+```{r}
+drug_use %>%
+  slice(1)
+```
+
+**Slice Head/Tail**
+
+Select the top head rows from the dataframe.
+
+```{r}
+drug_use %>%
+  slice_head(n = 5)
+```
+
+Select the last five rows from the dataframe. 
+
+```{r}
+drug_use %>%
+  slice_tail(n = 5)
+```
+
+
+**Slice Min/Max**
+
+Get the minimum alcohol-use value of five rows in the dataframe. 
+
+```{r}
+drug_use %>%
+  slice_min(`alcohol-use`,n = 5)
+```
+
+Get the maximum alcohol-use value of five rows in the dataframe.
+```{r}
+drug_use %>%
+  slice_max(`alcohol-use`, n = 5)
+```
+
+
+### Relocate
+
+**RELOCATE** makes it easy to move a set of columns to another location. By default it moves the columns to the front.
+
+**USAGE**  
+relocate(.data, columns to move, before, after)
+
+**Use cases**
+
+Move columns to wherever specified when you need to rearrange the dataframe.
+
+Relocate using **after**. Move alcohol-use and frequency to after marijuana-frequency. 
+
+```{r}
+drug_use %>%
+  relocate(`alcohol-use`:`alcohol-frequency`, .after = `marijuana-frequency`)
+```
+
+Relocate using **before**. Move marijuana-use and frequence to before alcohol-use.
+
+```{r}
+drug_use %>%
+  relocate(`marijuana-use`:`marijuana-frequency`, .before = `alcohol-use`)
+```
+
+
+### Arrange
+
+**ARRANGE** makes it easy to move a set of rows to another location. It ignroes grouping unless explicitly mentioned.
+
+**USAGE**
+
+relocate(.data, variable/desc/function, .by_group = TRUE )
+
+**Use cases**
+
+Move rows to wherever specified when you need to rearrange the dataframe.In addition you can arrange in descending order, variable, or function specified.
+
+
+Sort marijuana use in ascending order, this will rearrange other values as well. 
+
+```{r}
+drug_use %>%
+  arrange(`marijuana-use`)
+```
+
+### Brian Singh -- Extend
+
+## Install additional libraries for use**
+
+```{r}
+library(ggplot2)
+```
+
+## Glimpse
+
+**Glimpse** is like a transposed version of print(): columns run down the page, and data runs across. This makes it possible to see every column in a data frame and its type with a snapshot of the data within the columns.
+
+```{r}
+glimpse(drug_use)
+```
+
+## Piping
+
+**Piping** within DPLYR lets you take the output of one function and send it directly to the next, which is useful when you need to many things to the same data set. Pipes in R look like %>% and are made available via the magrittr package installed as part of dplyr. Juan's code above shows examples of using pipes to filter, arrange, etc., but you can also use piping to create visuals using ggplot. We'll use piping to show correlations between alcohol use and marijuana use by age group.
+
+```{r}
+drug_use %>%
+    ggplot(aes(x=`alcohol-use`, y=`marijuana-use`, color=age)) +
+  geom_point() +
+  labs(title = "Alcohol vs. Marijuana use", x="Alcohol Use",y="Marijuana Use",colour="Age")
+```
+
+## Pull
+
+**Pull** is similar to $. It's mostly useful because it looks a little nicer in pipes, it also works with remote data frames, and it can optionally name the output. It allows you to extract columns from a data frame.
+
+```{r}
+alcohol_use <- drug_use %>%
+    pull(age,`alcohol-use`)
+```
+
+## Convert values to NA
+
+**na_if**  is a translation of the SQL command NULLIF. It is useful if you want to convert an annoying value to NA. Within the drug_use data frame, you can see the column "crack-frequency" is a character column, and it is possibly interpreted as one due to the "-" values, representing a null value. Let's replace "-" with NA across the entire data frame. You can then convert the columns to numeric, as needed, for use in calculations.
+
+```{r}
+drug_use <- drug_use %>%
+    na_if(.,"-")
+
+drug_use$`crack-frequency` <- as.numeric(drug_use$`crack-frequency`)
+```
+
+
+
